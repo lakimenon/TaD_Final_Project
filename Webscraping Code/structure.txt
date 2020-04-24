@@ -1,0 +1,38 @@
+https://www.rev.com/
+    https://www.rev.com/blog/transcript-tag/coronavirus-update-transcripts
+        Page 1
+            Article A
+            Article B
+            Article C
+        Page 2
+        ...
+        Page 3
+        ...
+        Page 43
+
+
+
+
+#css
+for sub_block in response.css('div.js-categories-seasonal tr ~ tr') :
+    do_something
+​
+#xpath
+for sub_block in response.xpath('//div[@class="js-categories-seasonal js-block-list list"]/tr') :
+    do_something
+
+
+
+
+#css
+sub = response.css('div.fl-module tr ~ tr')[0]
+title = sub.xpath('//a[@class="hoverinfo_trigger fw-b"]/strong/text()').extract_first().strip()
+​
+#xpath
+for sub_block in response.xpath('//div[@class="fl-module fl-module-post-grid "]/tr') :
+    do_something
+
+
+
+
+div.fl-module.fl-module-post-grid.fl-node-5e1f0f25c9de7
