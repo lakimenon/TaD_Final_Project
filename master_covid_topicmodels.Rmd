@@ -74,5 +74,8 @@ Canada - Canada, Trudeau
 # data[document]
 df <- data.frame(data)
 df[1,1:2]
+
+US_df <- df[grep(c("Trump|US|United States"), df$document),]
+US_df
 ```
 
