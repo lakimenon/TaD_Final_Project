@@ -16,6 +16,7 @@ Lakshmi Menon, Angela Marie Teng
 # get current working directory
 rm(list = ls())
 getwd()  
+# setwd("~/Data/articles")
 
 # loading packages 
 library(dplyr)
@@ -28,6 +29,8 @@ lapply(libraries, require, character.only=TRUE)
 set.seed(100)
 library(quanteda)
 library("devtools")
+# install.packages("textreadr")
+library(textreadr)
 
 # Load it into our environment
 library(quanteda.corpora)
@@ -43,8 +46,16 @@ packageVersion("quanteda")
 ```
 
 
-```{r data_load,}
-summary(cars)
+```{r data_load, echo =TRUE}
+# temp = list.files(pattern="*.txt")
+# myfiles = lapply(temp, read.delim)
+
+## the read in of a directory
+read_dir('/Users/angelateng/Desktop/Github_Files_Teng/TaD_Final_Project/Data/articles')
+
+# list all csv files from the current directory
+# list.files(pattern=".txt$") # use the pattern argument to define a common pattern  for import files with regex. Here: .csv
+ 
 ```
 
 ## Including Plots
