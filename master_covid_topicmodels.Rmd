@@ -1,0 +1,58 @@
+---
+title: "COVID_TopicModel"
+author: "Angela Teng"
+date: "4/29/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Text as Data Final Project 
+Lakshmi Menon, Angela Marie Teng
+
+```{r include = FALSE}
+# get current working directory
+rm(list = ls())
+getwd()  
+
+# loading packages 
+library(dplyr)
+library(ggplot2)
+library(xtable)
+
+# Loading multiple packages
+libraries <- c("foreign", "stargazer")
+lapply(libraries, require, character.only=TRUE)
+set.seed(100)
+library(quanteda)
+library("devtools")
+
+# Load it into our environment
+library(quanteda.corpora)
+# library(quanteda)
+# install.packages("readtext")
+library(readtext)
+# install.packages("spacyr")
+library(spacyr)
+
+# to check version
+packageVersion("quanteda")
+
+```
+
+
+```{r data_load,}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
