@@ -97,46 +97,60 @@ CA_df <- df[grep(c("Justin|Trudeau|Canada"), df$document),]
 CA_df
 ```
 
+
+
+
+
 R Webscraping Code 
 ```{r scrape_text, echo = TRUE}
 
-
-scrapetext <- function(url, filename){
-  transcript <- read_html(uk_mar16)
-  
-  text <- transcript %>% 
-    rvest::html_nodes(xpath = "//div[contains(@class, 'fl-callout-text')]") %>% 
-    xml2::xml_find_all("div/p") %>% 
-    rvest::html_text()
-
-  speakers <- transcript %>% 
-    rvest::html_nodes(xpath = "//div[contains(@class, 'fl-callout-text')]") %>% 
-    xml2::xml_find_all("div/p/text()[following-sibling::br]") %>% 
-    rvest::html_text() %>%
-    unique()
-  
-  speaker_fname = paste(filename, 'speakers.txt', sep = '_')
-  text_fname = paste(filename, 'text.txt', sep = '_')
-  write_file(speaker_fname, speakers)
-  write_file(text_fname, text)
-}
-
-write_file <- function(fname, data){
-  fileConn<-file(fname)
-  writeLines(data, fileConn)
-  close(fileConn)  
-}
-
-
-d <- data.frame(urls, fnames)
-for(i in seq_len(nrow(d))) {
-  scrapetext(d[i,1], d[i,2])
-}
+# 
+# scrapetext <- function(url, filename){
+#   transcript <- read_html(uk_mar16)
+#   
+#   text <- transcript %>% 
+#     rvest::html_nodes(xpath = "//div[contains(@class, 'fl-callout-text')]") %>% 
+#     xml2::xml_find_all("div/p") %>% 
+#     rvest::html_text()
+# 
+#   speakers <- transcript %>% 
+#     rvest::html_nodes(xpath = "//div[contains(@class, 'fl-callout-text')]") %>% 
+#     xml2::xml_find_all("div/p/text()[following-sibling::br]") %>% 
+#     rvest::html_text() %>%
+#     unique()
+#   
+#   speaker_fname = paste(filename, 'speakers.txt', sep = '_')
+#   text_fname = paste(filename, 'text.txt', sep = '_')
+#   write_file(speaker_fname, speakers)
+#   write_file(text_fname, text)
+# }
+# 
+# write_file <- function(fname, data){
+#   fileConn<-file(fname)
+#   writeLines(data, fileConn)
+#   close(fileConn)  
+# }
+# 
+# 
+# d <- data.frame(urls, fnames)
+# for(i in seq_len(nrow(d))) {
+#   scrapetext(d[i,1], d[i,2])
+# }
 ```
 
+```{r echo=TRUE}
+# *.1 Save workspace after running it -- all objects, functions, etc  (e.g. if you have run something computationally intensive and want to save the object for later use)
+# Similar to pickle() in Python
 
+save.image("./workspace_project.RData")
 
+# *.2 Pick up where you left off (but note that the workspace does not include packages. You need packrat for that)
 
+rm(list = ls())
+
+load("./workspace_project.RData")
+
+```
 
 
 
