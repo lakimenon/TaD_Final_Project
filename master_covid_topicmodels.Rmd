@@ -66,6 +66,8 @@ US - US, Trump
 New Zealand - New Zealand, [Jacinda] Ardern
 Australia - Australia, [Scott] Morrison
 Canada - Canada, [Justin] Trudeau
+
+(this data is from Data/Articles folder)
 ```{r subset_data, echo=TRUE}
 # select(data$document, matches("trump"))
 # data[,grepl("trump", colnames("document"))]
@@ -94,4 +96,48 @@ AU_df
 CA_df <- df[grep(c("Justin|Trudeau|Canada"), df$document),]
 CA_df
 ```
+
+R Webscraping Code 
+```{r scrape_text, echo = TRUE}
+
+
+scrapetext <- function(url, filename){
+  transcript <- read_html(uk_mar16)
+  
+  text <- transcript %>% 
+    rvest::html_nodes(xpath = "//div[contains(@class, 'fl-callout-text')]") %>% 
+    xml2::xml_find_all("div/p") %>% 
+    rvest::html_text()
+
+  speakers <- transcript %>% 
+    rvest::html_nodes(xpath = "//div[contains(@class, 'fl-callout-text')]") %>% 
+    xml2::xml_find_all("div/p/text()[following-sibling::br]") %>% 
+    rvest::html_text() %>%
+    unique()
+  
+  speaker_fname = paste(filename, 'speakers.txt', sep = '_')
+  text_fname = paste(filename, 'text.txt', sep = '_')
+  write_file(speaker_fname, speakers)
+  write_file(text_fname, text)
+}
+
+write_file <- function(fname, data){
+  fileConn<-file(fname)
+  writeLines(data, fileConn)
+  close(fileConn)  
+}
+
+
+d <- data.frame(urls, fnames)
+for(i in seq_len(nrow(d))) {
+  scrapetext(d[i,1], d[i,2])
+}
+```
+
+
+
+
+
+
+
 
