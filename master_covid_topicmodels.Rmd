@@ -56,8 +56,6 @@ Loading in all the articles from rev.com:
 ## the read in of a directory
 data = read_dir('/Users/angelateng/Desktop/Github_Files_Teng/TaD_Final_Project/Data/articles')
 
-# list all csv files from the current directory
-# list.files(pattern=".txt$") # use the pattern argument to define a common pattern  for import files with regex. Here: .csv
 summary(data)
 typeof(data)
 ```
@@ -67,15 +65,33 @@ UK - UK, [Boris] Johnson
 US - US, Trump 
 New Zealand - New Zealand, [Jacinda] Ardern
 Australia - Australia, [Scott] Morrison
-Canada - Canada, Trudeau
+Canada - Canada, [Justin] Trudeau
 ```{r subset_data, echo=TRUE}
 # select(data$document, matches("trump"))
 # data[,grepl("trump", colnames("document"))]
 # data[document]
+
+# turn list into df
 df <- data.frame(data)
+# sanity check
 df[1,1:2]
 
-US_df <- df[grep(c("Trump|US|United States"), df$document),]
+# subset countries by keyword
+US_df <- df[grep(c("Donald|Trump|US|United States"), df$document),]
 US_df
+
+UK_df <- df[grep(c("Boris|Johnson|United Kingdom|UK"), df$document),]
+UK_df
+
+
+NZ_df <- df[grep(c("Jacinda|Ardern|New Zealand"), df$document),]
+NZ_df
+
+
+AU_df <- df[grep(c("Scott|Morrison|Australia"), df$document),]
+AU_df
+
+CA_df <- df[grep(c("Justin|Trudeau|Canada"), df$document),]
+CA_df
 ```
 
