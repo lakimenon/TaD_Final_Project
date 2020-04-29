@@ -97,8 +97,19 @@ CA_df <- df[grep(c("Justin|Trudeau|Canada"), df$document),]
 CA_df
 ```
 
+Now, we want to preprocess our text and convert it into a dfm
+```{r preprocessing, echo = TRUE}
 
 
+
+```
+
+
+Now that we have a DFM, we want to do basic exploratory data analysis
+```{r eda, echo=TRUE}
+
+
+```
 
 
 R Webscraping Code 
@@ -138,13 +149,12 @@ R Webscraping Code
 # }
 ```
 
-```{r echo=TRUE}
-# *.1 Save workspace after running it -- all objects, functions, etc  (e.g. if you have run something computationally intensive and want to save the object for later use)
-# Similar to pickle() in Python
 
+Saving... 
+```{r echo=TRUE}
+# save workspace
 save.image("./workspace_project.RData")
 
-# *.2 Pick up where you left off (but note that the workspace does not include packages. You need packrat for that)
 
 rm(list = ls())
 
