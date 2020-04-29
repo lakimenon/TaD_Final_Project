@@ -22,6 +22,7 @@ getwd()
 library(dplyr)
 library(ggplot2)
 library(xtable)
+library(plyr)
 
 library(rvest)
 library(dplyr)
@@ -45,6 +46,7 @@ library(spacyr)
 
 # to check version
 packageVersion("quanteda")
+
 
 ```
 
@@ -99,8 +101,12 @@ CA_df
 
 Now, we want to preprocess our text and convert it into a dfm
 ```{r preprocessing, echo = TRUE}
+?dfm
+?corpus
 
-
+US_df <- rename(US_df, c("content"="text"))
+US_df
+us_corp <- corpus(US_df)
 
 ```
 
