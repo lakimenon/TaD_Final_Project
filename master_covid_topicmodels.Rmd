@@ -142,6 +142,8 @@ num_tokens_us_1
 us_dfm_apr1 <- dfm(us_corp, tolower=TRUE, stem = TRUE,  remove = stopwords("english"), remove_punct = TRUE)
 us_dfm_apr1
 
+# write a function do to this for all trump documents 
+US_uniq_docs[1]
 
 ```
 
