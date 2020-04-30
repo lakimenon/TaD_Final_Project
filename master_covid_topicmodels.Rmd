@@ -46,8 +46,8 @@ library(spacyr)
 
 # to check version
 packageVersion("quanteda")
-
-
+# install.packages("magicfor")
+library(magicfor)
 ```
 
 Loading in all the articles from rev.com:
@@ -148,19 +148,41 @@ us_dfm_apr1
 # write a function do to this for all trump documents 
 US_uniq_docs[1]
 
+
 new_dfm <- function(input_corpus) {
   dfm(input_corpus, tolower=TRUE, stem = TRUE,  remove = stopwords("english"), remove_punct = TRUE)
 }
   
 new_dfm(US_uniq_docs[1])
 
-new_dfm(us_corp$document == US_uniq_docs[1]) 
-# for (doc_i in US_uniq_docs) {
-#   # print(doc_i)
-#   us_dfm_l <- dfm(us_corp$document == US_uniq_docs[doc_i], tolower=TRUE, stem = TRUE,  remove = stopwords("english"), remove_punct = TRUE)
-#   # l <- as.list(1:44)
-#   # names(l) <- 
-# }
+# new_dfm(us_corp$document == US_uniq_docs[1])
+
+US_dfm_list <- vector
+
+for (i  in 1:44){
+  new_dfm <- input_corpus(corpus_subset(us_corp, document == US_uniq_docs[i]))
+}
+
+
+new_dfm(corpus_subset(us_corp, document == US_uniq_docs[1]))
+
+US_briefing_1 <- corpus_subset(us_corp, document == US_uniq_docs[1])
+us_dfm_1 <- dfm(US_briefing_1, tolower=TRUE, stem = TRUE,  remove = stopwords("english"), remove_punct = TRUE)
+
+
+for (doc_i in US_uniq_docs) {
+  # print(doc_i)
+  US_briefing <- corpus_subset(us_corp, document == US_uniq_docs[doc_i])
+  print(US_briefing)
+  us_dfm <- dfm(US_briefing, tolower=TRUE, stem = TRUE,  remove = stopwords("english"), remove_punct = TRUE)
+  print(us_dfm)
+  # l <- as.list(1:44)
+  # names(l) <-
+}
+
+
+US_briefing_apr1 <- corpus_subset(us_corp, document == "Apr 1, 2020Donald Trump and the Coronavirus Task Fo")
+US_briefing_apr1
 
 us_corp$document == US_uniq_docs[1]
 ```
