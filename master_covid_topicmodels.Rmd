@@ -81,21 +81,21 @@ df <- data.frame(data)
 df[1,1:2]
 
 # subset countries by keyword
-US_df <- df[grep(c("Donald|Trump|US|United States"), df$document),]
+US_df <- df[grep(c("Donald|Trump|US|United States|coronavirus|COVID"), df$document),]
 US_df
 
-UK_df <- df[grep(c("Boris|Johnson|United Kingdom|UK"), df$document),]
+UK_df <- df[grep(c("Boris|Johnson|United Kingdom|UK|coronavirus|COVID"), df$document),]
 UK_df
 
 
-NZ_df <- df[grep(c("Jacinda|Ardern|New Zealand"), df$document),]
+NZ_df <- df[grep(c("Jacinda|Ardern|New Zealand|coronavirus|COVID"), df$document),]
 NZ_df
 
 
-AU_df <- df[grep(c("Scott|Morrison|Australia"), df$document),]
+AU_df <- df[grep(c("Scott|Morrison|Australia|coronavirus|COVID"), df$document),]
 AU_df
 
-CA_df <- df[grep(c("Justin|Trudeau|Canada"), df$document),]
+CA_df <- df[grep(c("Justin|Trudeau|Canada|coronavirus|COVID"), df$document),]
 CA_df
 ```
 
