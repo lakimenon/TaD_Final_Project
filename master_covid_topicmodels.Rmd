@@ -142,9 +142,27 @@ num_tokens_us_1
 us_dfm_apr1 <- dfm(us_corp, tolower=TRUE, stem = TRUE,  remove = stopwords("english"), remove_punct = TRUE)
 us_dfm_apr1
 
+# combine DFM by rows https://rdrr.io/cran/quanteda/man/cbind.dfm.html 
+# so that all of the paragraphs in 1 article are read in as 1 dfm 
+
 # write a function do to this for all trump documents 
 US_uniq_docs[1]
 
+new_dfm <- function(input_corpus) {
+  dfm(input_corpus, tolower=TRUE, stem = TRUE,  remove = stopwords("english"), remove_punct = TRUE)
+}
+  
+new_dfm(US_uniq_docs[1])
+
+new_dfm(us_corp$document == US_uniq_docs[1]) 
+# for (doc_i in US_uniq_docs) {
+#   # print(doc_i)
+#   us_dfm_l <- dfm(us_corp$document == US_uniq_docs[doc_i], tolower=TRUE, stem = TRUE,  remove = stopwords("english"), remove_punct = TRUE)
+#   # l <- as.list(1:44)
+#   # names(l) <- 
+# }
+
+us_corp$document == US_uniq_docs[1]
 ```
 
 
