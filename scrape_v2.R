@@ -30,6 +30,15 @@ matches <- df[(grepl(paste(toMatch,collapse='|'),
                      df$title)), ]
 row.names(matches) <- NULL
 
+
+#Special URLs
+matches$url[19] = 'https://www.rev.com/blog/transcripts/donald-trump-coronavirus-press-briefing-transcript-april-16'
+matches$url[69] = 'https://www.rev.com/blog/transcripts/transcript-trump-signs-historic-2-trillion-coronavirus-stimulus-bill'
+matches$url[93] = 'https://www.rev.com/blog/transcripts/justin-trudeau-coronavirus-update-for-canada-march-20'
+matches$url[110] = 'https://www.rev.com/blog/transcripts/donald-trump-mike-pence-and-coronavirus-update-transcript-march-9'
+
+
+#Function to scrape text without speaker names
 scrapetextonly <- function(url, title){
   transcript <- read_html(url)
   text <- transcript %>% 
@@ -49,6 +58,8 @@ write_file <- function(fname, data){
   close(fileConn)  
 }
 
+
+#try catch for scraping
 try_scrape <- function(url, title) {
   out <- tryCatch(
     {
@@ -64,6 +75,8 @@ try_scrape <- function(url, title) {
   return(out)
 }
 
+
+#Scraping the text
 errs <- c()
 for( i in 1:nrow(matches)){
   trans <- try_scrape(toString(matches$url[i]), toString(matches$title[i]))
@@ -72,3 +85,10 @@ for( i in 1:nrow(matches)){
   }
   texts <- append(texts, trans)
 }
+
+#Adding texts as column to dataframe
+matches$text <- texts[2:121]
+
+
+save.image('scraped.RData')
+load('scraped_.RData')
