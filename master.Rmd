@@ -141,15 +141,21 @@ head(matches)
 
 Now, we want to preprocess our text and convert it into a dfm
 ```{r preprocessing, echo = TRUE}
-# ?dfm
-# ?corpus
+colnames(matches)
+typeof(matches)
 
+# turn list into df
+df <- as.data.frame(matches)
 
+df <- rename(df, c("text"="text"))
+attributes(df)
 
-US_df <- rename(US_df, c("text"="text"))
-US_df
+typeof(df)
+typeof(df$text)
 
-covid_corp <- corpus(matches)
+# write.csv(df,"/Users/angelateng/Desktop/Github_Files_Teng/TaD_Final_Project/Data/master.csv")
+
+covid_corp <- corpus(df, text_field ='text')
 us_corp
 
 head(us_corp)
