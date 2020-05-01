@@ -78,6 +78,7 @@ try_scrape <- function(url, title) {
 
 #Scraping the text
 errs <- c()
+texts <- c()
 for( i in 1:nrow(matches)){
   trans <- try_scrape(toString(matches$url[i]), toString(matches$title[i]))
   if(is.na(trans)){
@@ -91,4 +92,4 @@ matches$text <- texts[2:121]
 
 
 save.image('scraped.RData')
-load('scraped_.RData')
+load('scraped.RData')
