@@ -40,12 +40,15 @@ library(rjson)
 
 # Load it into our environment
 library(quanteda.corpora)
-# library(quanteda)
-# install.packages("readtext")
+library(quanteda)
+# install.packages("tm")
+library(tm)
 library(readtext)
 # install.packages("spacyr")
 library(spacyr)
 
+libraries <- c("topicmodels", "dplyr", "stm", "quanteda")
+lapply(libraries, require, character.only = T)
 # to check version
 packageVersion("quanteda")
 # install.packages("magicfor")
@@ -62,6 +65,7 @@ data = read_dir('/Users/angelateng/Desktop/Github_Files_Teng/TaD_Final_Project/D
 
 summary(data)
 typeof(data)
+attributes(data)
 ```
 
 Selecting only articles that contain keywords per country: 
@@ -77,7 +81,9 @@ Load in scraped data:
 
 ```{r data_scraped, echo = TRUE}
 load('./Workspaces/scraped_dates.RData')
-# summary(matches)
+summary(matches)
+
+matches$country <- ifelse(grepl("Donald|Trump|US|United States", matches$title), "US", "country")
 
 matches$country <- ifelse(grepl("Donald|Trump|US|United States", matches$title), "US", matches$country)
 
@@ -91,86 +97,73 @@ matches$country <- ifelse(grepl("Justin|Trudeau|Canada", matches$title), "CA", m
 
 head(matches)
 
+colnames(matches)
+typeof(matches)
+attributes(matches)
 
-# US_df <- df[grep(c("Donald|Trump|US|United States"), df$document),]
-# US_df
-# 
-# UK_df <- df[grep(c("Boris|Johnson|United Kingdom|UK"), df$document),]
-# UK_df
-# 
-# 
-# NZ_df <- df[grep(c("Jacinda|Ardern|New Zealand"), df$document),]
-# NZ_df
-# 
-# 
-# AU_df <- df[grep(c("Scott|Morrison|Australia"), df$document),]
-# AU_df
-# 
-# CA_df <- df[grep(c("Justin|Trudeau|Canada"), df$document),]
-# CA_df
 ```
 
 ```{r subset_data, echo=TRUE}
-# select(data$document, matches("trump"))
-# data[,grepl("trump", colnames("document"))]
-# data[document]
+matches[,grepl("trump", colnames("title"))]
 
-# # turn list into df
-# df <- data.frame(data)
-# # sanity check
-# df[1,1:2]
-# 
-# # subset countries by keyword
-# US_df <- df[grep(c("Donald|Trump|US|United States"), df$document),]
-# US_df
-# 
-# UK_df <- df[grep(c("Boris|Johnson|United Kingdom|UK"), df$document),]
-# UK_df
-# 
-# 
-# NZ_df <- df[grep(c("Jacinda|Ardern|New Zealand"), df$document),]
-# NZ_df
-# 
-# 
-# AU_df <- df[grep(c("Scott|Morrison|Australia"), df$document),]
-# AU_df
-# 
-# CA_df <- df[grep(c("Justin|Trudeau|Canada"), df$document),]
-# CA_df
+# turn list into df
+df <- data.frame(matches)
+# sanity check
+df[1,1:2]
+
 ```
 
 Now, we want to preprocess our text and convert it into a dfm
 ```{r preprocessing, echo = TRUE}
-colnames(matches)
-typeof(matches)
 
 # turn list into df
-df <- as.data.frame(matches)
+df <- as.data.frame(matches, stringsAsFactors=F)
 
-df <- rename(df, c("text"="text"))
 attributes(df)
 
 typeof(df)
 typeof(df$text)
 
-# write.csv(df,"/Users/angelateng/Desktop/Github_Files_Teng/TaD_Final_Project/Data/master.csv")
+df <- data.frame("title" = df$title, 
+                              "text" = df$text,
+                              "date" = df$date, 
+                              "country" =df$country)
 
-covid_corp <- corpus(df, text_field ='text')
-us_corp
 
-head(us_corp)
+mode(df$text)
+storage.mode(df$text) <- "character"
+
+covid_corp <- corpus(df, text_field ="text" )
+
+head(df)
+
+write.csv(df,"/Users/angelateng/Desktop/Github_Files_Teng/TaD_Final_Project/Data/master.csv")
+
+df <- apply(df,2,as.character)
+head(df)
+
+head(covid_corp)
 # a corpus consists ofs: (1) documents: text + doc level data (2) corpus metadata (3) extras (settings)
-head(docvars(us_corp))  # document-level variables
-metacorpus(us_corp)  # corpus-level variables
+head(docvars(covid_corp))  # document-level variables
+metacorpus(covid_corp)  # corpus-level variables
 
 # ndoc identifies the number of documents in a corpus
-ndocs_us <- ndoc(us_corp)
+ndocs <- ndoc(covid_corp)
 # this is because it's subdividedd into paragraph, rather than article.....
-ndocs_us
+ndocs
 
-us_corpusinfo <- summary(us_corp, n = ndocs_us)  # note n default is 100
-head(us_corpusinfo)
+corpusinfo <- summary(covid_corp, n = ndocs)  # note n default is 100
+head(corpusinfo)
+```
 
+
+
+
+
+
+
+
+```{r echo = TRUE}
 # unique(us_corp$document)
 # list of unique trump documents
 US_uniq_docs <- unique(US_df$document)
