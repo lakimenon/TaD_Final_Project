@@ -151,8 +151,9 @@ head(corpusinfo)
 
 
 
+STM recommended preprocessing from paper (this takes super long to run)
 ```{r echo = TRUE}
-# STM
+# STM Recommended preprocessing from paper
 
 # data <- read.csv("./Data/master.csv")
 # head(data)
@@ -173,6 +174,7 @@ save.image("./Workspaces/STM_preprocessing.RData")
 ```
 
 
+Quanteda Preprocessing and DFM creation
 ```{r echo = TRUE}
 
 # Using data from the corpus
@@ -187,8 +189,8 @@ dfm
 
 ```
 
-
-```{r stm, echo=TRUE}
+Basic EDA by country - the countries that say country aren't associated with our keywords (do not have our keywords in the title)
+```{r dfm, echo=TRUE}
 head(docvars(covid_corp))
 
 # Create a table that shows how many documents are associated with each newspaper
@@ -252,6 +254,11 @@ save.image("./Workspaces/LDA_topicmodel_master.RData")
 Examine top contribuuting topics
 ```{r top_lda, echo = True}
 
+top_topics_lda <- data.frame(title = covid_corp$documents$title, country = covid_corp$documents$country, top_topic = most_prob_topic_lda, date = covid_corp$documents$date)
+top_topics_lda
+
+save(top_topics_lda, file = "./Data/top_topics_lda.Rdata")
+save.image("./Workspaces/top_lda_topics.RData")
 
 
 
