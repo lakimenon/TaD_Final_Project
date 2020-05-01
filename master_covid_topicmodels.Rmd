@@ -36,6 +36,8 @@ library("devtools")
 # install.packages("textreadr")
 library(textreadr)
 
+library(rjson)
+
 # Load it into our environment
 library(quanteda.corpora)
 # library(quanteda)
@@ -70,6 +72,44 @@ Australia - Australia, [Scott] Morrison
 Canada - Canada, [Justin] Trudeau
 
 (this data is from Data/Articles folder)
+
+Load in scraped data: 
+
+```{r data_scraped, echo = TRUE}
+load('./Workspaces/scraped_dates.RData')
+# summary(matches)
+
+matches$country <- ifelse(grepl("Donald|Trump|US|United States", matches$title), "US", matches$country)
+
+matches$country <- ifelse(grepl("Boris|Johnson|United Kingdom|UK", matches$title), "UK", matches$country)
+
+matches$country <- ifelse(grepl("Jacinda|Ardern|New Zealand", matches$title), "NZ", matches$country)
+
+matches$country <- ifelse(grepl("Scott|Morrison|Australia", matches$title), "AU", matches$country)
+
+matches$country <- ifelse(grepl("Justin|Trudeau|Canada", matches$title), "CA", matches$country)
+
+head(matches)
+
+
+US_df <- df[grep(c("Donald|Trump|US|United States"), df$document),]
+US_df
+
+UK_df <- df[grep(c("Boris|Johnson|United Kingdom|UK"), df$document),]
+UK_df
+
+
+NZ_df <- df[grep(c("Jacinda|Ardern|New Zealand"), df$document),]
+NZ_df
+
+
+AU_df <- df[grep(c("Scott|Morrison|Australia"), df$document),]
+AU_df
+
+CA_df <- df[grep(c("Justin|Trudeau|Canada"), df$document),]
+CA_df
+```
+
 ```{r subset_data, echo=TRUE}
 # select(data$document, matches("trump"))
 # data[,grepl("trump", colnames("document"))]
@@ -199,24 +239,52 @@ R Webscraping Code
 ```{r scrape_text, echo = TRUE}
 
 # 
-# scrapetext <- function(url, filename){
-#   transcript <- read_html(uk_mar16)
-#   
+# #Parse JSON of urls of all covid related transcripts
+# json_data <- fromJSON(file='WebscrapingCode/raw_content.json')
+# 
+# df <- lapply(json_data, function(url) 
+# {
+#   data.frame(matrix(unlist(url), ncol = 2, byrow=T))
+# })
+# 
+# df <- do.call(rbind, df)
+# 
+# colnames(df) <- c('url', 'title')
+# rownames(df) <- NULL
+# 
+# #Correcting URLs
+# url_prefix <-'https://www.rev.com/blog/transcripts/'
+# titles <- gsub(' ', '-', df$title) %>% tolower()
+# titles <- iconv(titles, 'utf-8', 'ascii', sub='')
+# titles <- gsub(':', '', titles) 
+# df$url <- Map(paste, url_prefix, titles, sep = "")
+# 
+# #Selecting only transcripts of Country Leaders
+# toMatch <- c('Trump', 'Trudeau', 'Morrison', 'Kingdom', 'Britain', 'Zealand', 'Boris', 'Task', 'U.S.', 'Jacinda', 'Ardern')
+# matches <- df[(grepl(paste(toMatch,collapse='|'), 
+#                      df$title)), ]
+# row.names(matches) <- NULL
+# 
+# 
+# #Special URLs
+# matches$url[19] = 'https://www.rev.com/blog/transcripts/donald-trump-coronavirus-press-briefing-transcript-april-16'
+# matches$url[69] = 'https://www.rev.com/blog/transcripts/transcript-trump-signs-historic-2-trillion-coronavirus-stimulus-bill'
+# matches$url[93] = 'https://www.rev.com/blog/transcripts/justin-trudeau-coronavirus-update-for-canada-march-20'
+# matches$url[110] = 'https://www.rev.com/blog/transcripts/donald-trump-mike-pence-and-coronavirus-update-transcript-march-9'
+# 
+# 
+# #Function to scrape text without speaker names
+# scrapetextonly <- function(url, title){
+#   transcript <- read_html(url)
 #   text <- transcript %>% 
 #     rvest::html_nodes(xpath = "//div[contains(@class, 'fl-callout-text')]") %>% 
-#     xml2::xml_find_all("div/p") %>% 
+#     xml2::xml_find_all("div/p/text()[preceding-sibling::br]") %>% 
 #     rvest::html_text()
-# 
-#   speakers <- transcript %>% 
-#     rvest::html_nodes(xpath = "//div[contains(@class, 'fl-callout-text')]") %>% 
-#     xml2::xml_find_all("div/p/text()[following-sibling::br]") %>% 
-#     rvest::html_text() %>%
-#     unique()
 #   
-#   speaker_fname = paste(filename, 'speakers.txt', sep = '_')
-#   text_fname = paste(filename, 'text.txt', sep = '_')
-#   write_file(speaker_fname, speakers)
+#   text_fname = paste(title, '.txt', sep = '')
+#   text_fname = paste('Data/all_texts/', text_fname, sep = '')
 #   write_file(text_fname, text)
+#   return(toString(text))
 # }
 # 
 # write_file <- function(fname, data){
@@ -226,17 +294,48 @@ R Webscraping Code
 # }
 # 
 # 
-# d <- data.frame(urls, fnames)
-# for(i in seq_len(nrow(d))) {
-#   scrapetext(d[i,1], d[i,2])
+# #try catch for scraping
+# try_scrape <- function(url, title) {
+#   out <- tryCatch(
+#     {
+#       scrapetextonly(url, title)
+#     },
+#     error=function(cond) {
+#       message(paste("URL does not seem to exist:", url))
+#       message("Here's the original error message:")
+#       message(cond)
+#       return(NA)
+#     }
+#   )    
+#   return(out)
 # }
+# 
+# 
+# #Scraping the text
+# errs <- c()
+# texts <- c()
+# for( i in 1:nrow(matches)){
+#   trans <- try_scrape(toString(matches$url[i]), toString(matches$title[i]))
+#   if(is.na(trans)){
+#     errs <- append(errs, i)
+#   }
+#   texts <- append(texts, trans)
+# }
+# 
+# #Adding texts as column to dataframe
+# matches$text <- texts[2:121]
+# 
+# 
+# save.image('scraped.RData')
+# load('scraped.RData')
+
 ```
 
 
 Saving... 
 ```{r echo=TRUE}
 # save workspace
-save.image("./workspace_project.RData")
+save.image("./Workspaces/workspace_master.RData")
 
 
 rm(list = ls())
