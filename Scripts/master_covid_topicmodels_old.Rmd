@@ -1,0 +1,351 @@
+---
+title: "COVID_TopicModel"
+author: "Angela Teng"
+date: "4/29/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Text as Data Final Project 
+Lakshmi Menon, Angela Marie Teng
+
+```{r include = FALSE}
+# get current working directory
+rm(list = ls())
+getwd()  
+# setwd("~/Data/articles")
+
+# loading packages 
+library(dplyr)
+library(ggplot2)
+library(xtable)
+library(plyr)
+
+library(rvest)
+library(dplyr)
+
+# Loading multiple packages
+libraries <- c("foreign", "stargazer")
+lapply(libraries, require, character.only=TRUE)
+set.seed(100)
+library(quanteda)
+library("devtools")
+# install.packages("textreadr")
+library(textreadr)
+
+library(rjson)
+
+# Load it into our environment
+library(quanteda.corpora)
+# library(quanteda)
+# install.packages("readtext")
+library(readtext)
+# install.packages("spacyr")
+library(spacyr)
+
+# to check version
+packageVersion("quanteda")
+# install.packages("magicfor")
+library(magicfor)
+```
+
+Loading in all the articles from rev.com:
+```{r data_load, echo =TRUE}
+# temp = list.files(pattern="*.txt")
+# myfiles = lapply(temp, read.delim)
+
+## the read in of a directory
+data = read_dir('/Users/angelateng/Desktop/Github_Files_Teng/TaD_Final_Project/Data/articles')
+
+summary(data)
+typeof(data)
+```
+
+Selecting only articles that contain keywords per country: 
+UK - UK, [Boris] Johnson
+US - US, Trump 
+New Zealand - New Zealand, [Jacinda] Ardern
+Australia - Australia, [Scott] Morrison
+Canada - Canada, [Justin] Trudeau
+
+(this data is from Data/Articles folder)
+
+Load in scraped data: 
+
+```{r data_scraped, echo = TRUE}
+load('./Workspaces/scraped_dates.RData')
+# summary(matches)
+
+matches$country <- ifelse(grepl("Donald|Trump|US|United States", matches$title), "US", matches$country)
+
+matches$country <- ifelse(grepl("Boris|Johnson|United Kingdom|UK", matches$title), "UK", matches$country)
+
+matches$country <- ifelse(grepl("Jacinda|Ardern|New Zealand", matches$title), "NZ", matches$country)
+
+matches$country <- ifelse(grepl("Scott|Morrison|Australia", matches$title), "AU", matches$country)
+
+matches$country <- ifelse(grepl("Justin|Trudeau|Canada", matches$title), "CA", matches$country)
+
+head(matches)
+
+
+# US_df <- df[grep(c("Donald|Trump|US|United States"), df$document),]
+# US_df
+# 
+# UK_df <- df[grep(c("Boris|Johnson|United Kingdom|UK"), df$document),]
+# UK_df
+# 
+# 
+# NZ_df <- df[grep(c("Jacinda|Ardern|New Zealand"), df$document),]
+# NZ_df
+# 
+# 
+# AU_df <- df[grep(c("Scott|Morrison|Australia"), df$document),]
+# AU_df
+# 
+# CA_df <- df[grep(c("Justin|Trudeau|Canada"), df$document),]
+# CA_df
+```
+
+```{r subset_data, echo=TRUE}
+# select(data$document, matches("trump"))
+# data[,grepl("trump", colnames("document"))]
+# data[document]
+
+# # turn list into df
+# df <- data.frame(data)
+# # sanity check
+# df[1,1:2]
+# 
+# # subset countries by keyword
+# US_df <- df[grep(c("Donald|Trump|US|United States"), df$document),]
+# US_df
+# 
+# UK_df <- df[grep(c("Boris|Johnson|United Kingdom|UK"), df$document),]
+# UK_df
+# 
+# 
+# NZ_df <- df[grep(c("Jacinda|Ardern|New Zealand"), df$document),]
+# NZ_df
+# 
+# 
+# AU_df <- df[grep(c("Scott|Morrison|Australia"), df$document),]
+# AU_df
+# 
+# CA_df <- df[grep(c("Justin|Trudeau|Canada"), df$document),]
+# CA_df
+```
+
+Now, we want to preprocess our text and convert it into a dfm
+```{r preprocessing, echo = TRUE}
+# ?dfm
+# ?corpus
+
+
+
+US_df <- rename(US_df, c("text"="text"))
+US_df
+
+covid_corp <- corpus(matches)
+us_corp
+
+head(us_corp)
+# a corpus consists ofs: (1) documents: text + doc level data (2) corpus metadata (3) extras (settings)
+head(docvars(us_corp))  # document-level variables
+metacorpus(us_corp)  # corpus-level variables
+
+# ndoc identifies the number of documents in a corpus
+ndocs_us <- ndoc(us_corp)
+# this is because it's subdividedd into paragraph, rather than article.....
+ndocs_us
+
+us_corpusinfo <- summary(us_corp, n = ndocs_us)  # note n default is 100
+head(us_corpusinfo)
+
+# unique(us_corp$document)
+# list of unique trump documents
+US_uniq_docs <- unique(US_df$document)
+US_uniq_docs 
+
+US_briefing_apr1 <- corpus_subset(us_corp, document == "Apr 1, 2020Donald Trump and the Coronavirus Task Fo")
+US_briefing_apr1
+
+
+# Using data from the corpus
+us_tokens_1 <- tokens(US_briefing_apr1, remove_punct = TRUE, stem = TRUE, remove_numbers = FALSE, remove_symbols = TRUE, remove_url = TRUE, tolower=TRUE, remove_hyphens=TRUE) 
+
+# tokens
+num_tokens_us_1 <- sum(lengths(us_tokens_1))
+num_tokens_us_1
+
+us_dfm_apr1 <- dfm(us_corp, tolower=TRUE, stem = TRUE,  remove = stopwords("english"), remove_punct = TRUE)
+us_dfm_apr1
+
+# combine DFM by rows https://rdrr.io/cran/quanteda/man/cbind.dfm.html 
+# so that all of the paragraphs in 1 article are read in as 1 dfm 
+
+# write a function do to this for all trump documents 
+US_uniq_docs[1]
+
+
+new_dfm <- function(input_corpus) {
+  dfm(input_corpus, tolower=TRUE, stem = TRUE,  remove = stopwords("english"), remove_punct = TRUE)
+}
+  
+new_dfm(US_uniq_docs[1])
+
+# new_dfm(us_corp$document == US_uniq_docs[1])
+
+US_dfm_list <- vector
+
+for (i  in 1:44){
+  new_dfm <- input_corpus(corpus_subset(us_corp, document == US_uniq_docs[i]))
+}
+
+
+new_dfm(corpus_subset(us_corp, document == US_uniq_docs[1]))
+
+US_briefing_1 <- corpus_subset(us_corp, document == US_uniq_docs[1])
+us_dfm_1 <- dfm(US_briefing_1, tolower=TRUE, stem = TRUE,  remove = stopwords("english"), remove_punct = TRUE)
+
+
+for (doc_i in US_uniq_docs) {
+  # print(doc_i)
+  US_briefing <- corpus_subset(us_corp, document == US_uniq_docs[doc_i])
+  print(US_briefing)
+  us_dfm <- dfm(US_briefing, tolower=TRUE, stem = TRUE,  remove = stopwords("english"), remove_punct = TRUE)
+  print(us_dfm)
+  # l <- as.list(1:44)
+  # names(l) <-
+}
+
+
+US_briefing_apr1 <- corpus_subset(us_corp, document == "Apr 1, 2020Donald Trump and the Coronavirus Task Fo")
+US_briefing_apr1
+
+us_corp$document == US_uniq_docs[1]
+```
+
+
+Now that we have a DFM, we want to do basic exploratory data analysis
+```{r eda, echo=TRUE}
+
+
+```
+
+
+R Webscraping Code 
+```{r scrape_text, echo = TRUE}
+
+# 
+# #Parse JSON of urls of all covid related transcripts
+# json_data <- fromJSON(file='WebscrapingCode/raw_content.json')
+# 
+# df <- lapply(json_data, function(url) 
+# {
+#   data.frame(matrix(unlist(url), ncol = 2, byrow=T))
+# })
+# 
+# df <- do.call(rbind, df)
+# 
+# colnames(df) <- c('url', 'title')
+# rownames(df) <- NULL
+# 
+# #Correcting URLs
+# url_prefix <-'https://www.rev.com/blog/transcripts/'
+# titles <- gsub(' ', '-', df$title) %>% tolower()
+# titles <- iconv(titles, 'utf-8', 'ascii', sub='')
+# titles <- gsub(':', '', titles) 
+# df$url <- Map(paste, url_prefix, titles, sep = "")
+# 
+# #Selecting only transcripts of Country Leaders
+# toMatch <- c('Trump', 'Trudeau', 'Morrison', 'Kingdom', 'Britain', 'Zealand', 'Boris', 'Task', 'U.S.', 'Jacinda', 'Ardern')
+# matches <- df[(grepl(paste(toMatch,collapse='|'), 
+#                      df$title)), ]
+# row.names(matches) <- NULL
+# 
+# 
+# #Special URLs
+# matches$url[19] = 'https://www.rev.com/blog/transcripts/donald-trump-coronavirus-press-briefing-transcript-april-16'
+# matches$url[69] = 'https://www.rev.com/blog/transcripts/transcript-trump-signs-historic-2-trillion-coronavirus-stimulus-bill'
+# matches$url[93] = 'https://www.rev.com/blog/transcripts/justin-trudeau-coronavirus-update-for-canada-march-20'
+# matches$url[110] = 'https://www.rev.com/blog/transcripts/donald-trump-mike-pence-and-coronavirus-update-transcript-march-9'
+# 
+# 
+# #Function to scrape text without speaker names
+# scrapetextonly <- function(url, title){
+#   transcript <- read_html(url)
+#   text <- transcript %>% 
+#     rvest::html_nodes(xpath = "//div[contains(@class, 'fl-callout-text')]") %>% 
+#     xml2::xml_find_all("div/p/text()[preceding-sibling::br]") %>% 
+#     rvest::html_text()
+#   
+#   text_fname = paste(title, '.txt', sep = '')
+#   text_fname = paste('Data/all_texts/', text_fname, sep = '')
+#   write_file(text_fname, text)
+#   return(toString(text))
+# }
+# 
+# write_file <- function(fname, data){
+#   fileConn<-file(fname)
+#   writeLines(data, fileConn)
+#   close(fileConn)  
+# }
+# 
+# 
+# #try catch for scraping
+# try_scrape <- function(url, title) {
+#   out <- tryCatch(
+#     {
+#       scrapetextonly(url, title)
+#     },
+#     error=function(cond) {
+#       message(paste("URL does not seem to exist:", url))
+#       message("Here's the original error message:")
+#       message(cond)
+#       return(NA)
+#     }
+#   )    
+#   return(out)
+# }
+# 
+# 
+# #Scraping the text
+# errs <- c()
+# texts <- c()
+# for( i in 1:nrow(matches)){
+#   trans <- try_scrape(toString(matches$url[i]), toString(matches$title[i]))
+#   if(is.na(trans)){
+#     errs <- append(errs, i)
+#   }
+#   texts <- append(texts, trans)
+# }
+# 
+# #Adding texts as column to dataframe
+# matches$text <- texts[2:121]
+# 
+# 
+# save.image('scraped.RData')
+# load('scraped.RData')
+
+```
+
+
+Saving... 
+```{r echo=TRUE}
+# save workspace
+save.image("./Workspaces/workspace_master.RData")
+
+
+rm(list = ls())
+
+load("./workspace_project.RData")
+
+```
+
+
+
+

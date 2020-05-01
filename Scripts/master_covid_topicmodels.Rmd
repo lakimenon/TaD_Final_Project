@@ -92,22 +92,22 @@ matches$country <- ifelse(grepl("Justin|Trudeau|Canada", matches$title), "CA", m
 head(matches)
 
 
-US_df <- df[grep(c("Donald|Trump|US|United States"), df$document),]
-US_df
-
-UK_df <- df[grep(c("Boris|Johnson|United Kingdom|UK"), df$document),]
-UK_df
-
-
-NZ_df <- df[grep(c("Jacinda|Ardern|New Zealand"), df$document),]
-NZ_df
-
-
-AU_df <- df[grep(c("Scott|Morrison|Australia"), df$document),]
-AU_df
-
-CA_df <- df[grep(c("Justin|Trudeau|Canada"), df$document),]
-CA_df
+# US_df <- df[grep(c("Donald|Trump|US|United States"), df$document),]
+# US_df
+# 
+# UK_df <- df[grep(c("Boris|Johnson|United Kingdom|UK"), df$document),]
+# UK_df
+# 
+# 
+# NZ_df <- df[grep(c("Jacinda|Ardern|New Zealand"), df$document),]
+# NZ_df
+# 
+# 
+# AU_df <- df[grep(c("Scott|Morrison|Australia"), df$document),]
+# AU_df
+# 
+# CA_df <- df[grep(c("Justin|Trudeau|Canada"), df$document),]
+# CA_df
 ```
 
 ```{r subset_data, echo=TRUE}
@@ -115,28 +115,28 @@ CA_df
 # data[,grepl("trump", colnames("document"))]
 # data[document]
 
-# turn list into df
-df <- data.frame(data)
-# sanity check
-df[1,1:2]
-
-# subset countries by keyword
-US_df <- df[grep(c("Donald|Trump|US|United States"), df$document),]
-US_df
-
-UK_df <- df[grep(c("Boris|Johnson|United Kingdom|UK"), df$document),]
-UK_df
-
-
-NZ_df <- df[grep(c("Jacinda|Ardern|New Zealand"), df$document),]
-NZ_df
-
-
-AU_df <- df[grep(c("Scott|Morrison|Australia"), df$document),]
-AU_df
-
-CA_df <- df[grep(c("Justin|Trudeau|Canada"), df$document),]
-CA_df
+# # turn list into df
+# df <- data.frame(data)
+# # sanity check
+# df[1,1:2]
+# 
+# # subset countries by keyword
+# US_df <- df[grep(c("Donald|Trump|US|United States"), df$document),]
+# US_df
+# 
+# UK_df <- df[grep(c("Boris|Johnson|United Kingdom|UK"), df$document),]
+# UK_df
+# 
+# 
+# NZ_df <- df[grep(c("Jacinda|Ardern|New Zealand"), df$document),]
+# NZ_df
+# 
+# 
+# AU_df <- df[grep(c("Scott|Morrison|Australia"), df$document),]
+# AU_df
+# 
+# CA_df <- df[grep(c("Justin|Trudeau|Canada"), df$document),]
+# CA_df
 ```
 
 Now, we want to preprocess our text and convert it into a dfm
@@ -144,8 +144,8 @@ Now, we want to preprocess our text and convert it into a dfm
 # ?dfm
 # ?corpus
 
-US_df <- rename(US_df, c("content"="text"))
-US_df
+# US_df <- rename(US_df, c("content"="text"))
+# US_df
 
 us_corp <- corpus(US_df)
 us_corp
