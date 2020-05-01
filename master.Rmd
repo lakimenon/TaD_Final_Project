@@ -168,7 +168,7 @@ save.image("./Workspaces/STM_preprocessing.RData")
 # docs <- out$documents
 # vocab <- out$vocab
 
-
+# @Amber question: Should we remove numbers in our preprocessing?
 
 ```
 
@@ -208,14 +208,56 @@ nfeat(dfm_trimmed)
 ndoc(dfm_trimmed)
 ```
 
+
+LDA Topic Modeling
 ```{r lda, echo=TRUE}
 lda_tm <- LDA(dfm_trimmed, k = 25, method = "Gibbs", iter=3000, control = list(seed = 1234))
 lda_tm
-
-
-
 save.image("./Workspaces/LDA_topicmodel.RData")
+
+log_likelihood_lda <- lda_tm@loglikelihood
+log_likelihood_lda
+
+# get top 10 words that contribute to each topic 
+top10_words_lda <- get_terms(lda_tm, k=10)
+top10_words_lda
+
+# save the  top  10  words  over  all  25  topics,  for  later  use.
+save(top10_words_lda, file = "./Data/top10words_lda.Rdata")
+
+save.image("./Workspaces/LDA_topicmodel_top10words.RData")
+
+# find most likely topic for each country
+most_likely_topics_lda <- topics(lda_tm)
+# most_likely_topics_lda
+
+lda_topics <- lda_tm@gamma
+lda_topics <- t(lda_topics)
+
+most_prob_topic_lda <- apply(lda_topics, 2, which.max)
+table_prob_topics_lda <- table(most_prob_topic_lda)
+# table_prob_topics_lda 
+
+# sort the table
+top_transcript_topics_lda <- sort(table(most_prob_topic_lda), decreasing=TRUE)
+top_transcript_topics_lda
+top_terms_lda_20 <- get_terms(lda_tm, k=20) 
+top_terms_lda_20 
+
+save.image("./Workspaces/LDA_topicmodel_master.RData")
+
 ```
+
+
+Examine top contribuuting topics
+```{r top_lda, echo = True}
+
+
+
+
+```
+
+
 
 
 ```{r stm, echo=TRUE}
