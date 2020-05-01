@@ -158,20 +158,7 @@ head(corpusinfo)
 
 
 
-
-
-
-
-
 ```{r echo = TRUE}
-# unique(us_corp$document)
-# list of unique trump documents
-US_uniq_docs <- unique(US_df$document)
-US_uniq_docs 
-
-US_briefing_apr1 <- corpus_subset(us_corp, document == "Apr 1, 2020Donald Trump and the Coronavirus Task Fo")
-US_briefing_apr1
-
 
 # Using data from the corpus
 us_tokens_1 <- tokens(US_briefing_apr1, remove_punct = TRUE, stem = TRUE, remove_numbers = FALSE, remove_symbols = TRUE, remove_url = TRUE, tolower=TRUE, remove_hyphens=TRUE) 
@@ -183,9 +170,6 @@ num_tokens_us_1
 us_dfm_apr1 <- dfm(us_corp, tolower=TRUE, stem = TRUE,  remove = stopwords("english"), remove_punct = TRUE)
 us_dfm_apr1
 
-# combine DFM by rows https://rdrr.io/cran/quanteda/man/cbind.dfm.html 
-# so that all of the paragraphs in 1 article are read in as 1 dfm 
-
 # write a function do to this for all trump documents 
 US_uniq_docs[1]
 
@@ -196,36 +180,7 @@ new_dfm <- function(input_corpus) {
   
 new_dfm(US_uniq_docs[1])
 
-# new_dfm(us_corp$document == US_uniq_docs[1])
 
-US_dfm_list <- vector
-
-for (i  in 1:44){
-  new_dfm <- input_corpus(corpus_subset(us_corp, document == US_uniq_docs[i]))
-}
-
-
-new_dfm(corpus_subset(us_corp, document == US_uniq_docs[1]))
-
-US_briefing_1 <- corpus_subset(us_corp, document == US_uniq_docs[1])
-us_dfm_1 <- dfm(US_briefing_1, tolower=TRUE, stem = TRUE,  remove = stopwords("english"), remove_punct = TRUE)
-
-
-for (doc_i in US_uniq_docs) {
-  # print(doc_i)
-  US_briefing <- corpus_subset(us_corp, document == US_uniq_docs[doc_i])
-  print(US_briefing)
-  us_dfm <- dfm(US_briefing, tolower=TRUE, stem = TRUE,  remove = stopwords("english"), remove_punct = TRUE)
-  print(us_dfm)
-  # l <- as.list(1:44)
-  # names(l) <-
-}
-
-
-US_briefing_apr1 <- corpus_subset(us_corp, document == "Apr 1, 2020Donald Trump and the Coronavirus Task Fo")
-US_briefing_apr1
-
-us_corp$document == US_uniq_docs[1]
 ```
 
 
