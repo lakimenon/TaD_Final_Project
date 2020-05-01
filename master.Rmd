@@ -158,57 +158,74 @@ head(corpusinfo)
 # head(data)
 length(covid_corp$documents)
 
+# note: this code is very slow
 # apply STM Vignette recommended preprocessing
-processed <- textProcessor(covid_corp$documents, metadata = covid_corp)
+processed <- textProcessor(covid_corp$documents)
 
 save.image("./Workspaces/STM_preprocessing.RData")
 
-out<- prepDocuments(processed$documents, processed$vocab, processed$meta)
-docs <- out$documents
-vocab <- out$vocab
-meta <- u
+# out<- prepDocuments(processed$documents, processed$vocab, processed$meta)
+# docs <- out$documents
+# vocab <- out$vocab
+
 
 
 ```
 
 
 ```{r echo = TRUE}
-system.time(
-blog_stm <- stm(docvars(covid_corp), 3, prevalence = ~rating + s(day), data = poliblog5k.meta))
-
-
-
 
 # Using data from the corpus
-us_tokens_1 <- tokens(US_briefing_apr1, remove_punct = TRUE, stem = TRUE, remove_numbers = FALSE, remove_symbols = TRUE, remove_url = TRUE, tolower=TRUE, remove_hyphens=TRUE) 
+tokens <- tokens(covid_corp, remove_punct = TRUE, remove_numbers = FALSE, remove_symbols = TRUE, remove_url = TRUE,  remove_hyphens=TRUE) 
 
 # tokens
-num_tokens_us_1 <- sum(lengths(us_tokens_1))
-num_tokens_us_1
+num_tokens <- sum(lengths(tokens))
+num_tokens
 
-us_dfm_apr1 <- dfm(us_corp, tolower=TRUE, stem = TRUE,  remove = stopwords("english"), remove_punct = TRUE)
-us_dfm_apr1
-
-# write a function do to this for all trump documents 
-US_uniq_docs[1]
-
-
-new_dfm <- function(input_corpus) {
-  dfm(input_corpus, tolower=TRUE, stem = TRUE,  remove = stopwords("english"), remove_punct = TRUE)
-}
-  
-new_dfm(US_uniq_docs[1])
-
+dfm <- dfm(covid_corp, tolower=TRUE, stem = TRUE,  remove = stopwords("english"), remove_punct = TRUE)
+dfm
 
 ```
 
 
-Now that we have a DFM, we want to do basic exploratory data analysis
-```{r eda, echo=TRUE}
+```{r stm, echo=TRUE}
+head(docvars(covid_corp))
+
+# Create a table that shows how many documents are associated with each newspaper
+# this works for R 3.5 but not 3.6 
+associated_docs <- aggregate(texts ~ country, data=as.data.frame(covid_corp$documents), FUN=length)
+associated_docs
+
+table(covid_corp$documents$country)
+# country is probably NA (meaning the title didn't match any of the key words)
+
+# remove  words  that  occur  fewer  than  20  times  or in  fewer  than  2  documents
+dfm_trimmed <- dfm_trim(dfm, min_termfreq=20, min_docfreq=2)
+head(dfm_trimmed)
+# total num of features after processing
+nfeat(dfm_trimmed)
+# total num of documents 
+ndoc(dfm_trimmed)
+```
+
+```{r lda, echo=TRUE}
+lda_tm <- LDA(dfm_trimmed, k = 25, method = "Gibbs", iter=3000, control = list(seed = 1234))
+lda_tm
+
+
+
+save.image("./Workspaces/LDA_topicmodel.RData")
+```
+
+
+```{r stm, echo=TRUE}
+
+system.time(
+stm <- stm(poliblog5k.docs, poliblog5k.voc, 3, prevalence = ~rating + s(day), data = poliblog5k.meta))
+
 
 
 ```
-
 
 R Webscraping Code 
 ```{r scrape_text, echo = TRUE}
