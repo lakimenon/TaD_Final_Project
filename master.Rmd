@@ -157,7 +157,16 @@ head(corpusinfo)
 # data <- read.csv("./Data/master.csv")
 # head(data)
 length(covid_corp$documents)
+
+# apply STM Vignette recommended preprocessing
 processed <- textProcessor(covid_corp$documents, metadata = covid_corp)
+
+save.image("./Workspaces/STM_preprocessing.RData")
+
+out<- prepDocuments(processed$documents, processed$vocab, processed$meta)
+docs <- out$documents
+vocab <- out$vocab
+meta <- u
 
 
 ```
