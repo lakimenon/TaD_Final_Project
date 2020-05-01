@@ -124,23 +124,16 @@ attributes(df)
 typeof(df)
 typeof(df$text)
 
-df <- data.frame("title" = df$title, 
-                              "text" = df$text,
-                              "date" = df$date, 
-                              "country" =df$country)
-
-
 mode(df$text)
 storage.mode(df$text) <- "character"
 
 covid_corp <- corpus(df, text_field ="text" )
 
+df <- apply(df,2,as.character)
 head(df)
 
 write.csv(df,"/Users/angelateng/Desktop/Github_Files_Teng/TaD_Final_Project/Data/master.csv")
 
-df <- apply(df,2,as.character)
-head(df)
 
 head(covid_corp)
 # a corpus consists ofs: (1) documents: text + doc level data (2) corpus metadata (3) extras (settings)
@@ -159,6 +152,23 @@ head(corpusinfo)
 
 
 ```{r echo = TRUE}
+# STM
+
+# data <- read.csv("./Data/master.csv")
+# head(data)
+length(covid_corp$documents)
+processed <- textProcessor(covid_corp$documents, metadata = covid_corp)
+
+
+```
+
+
+```{r echo = TRUE}
+system.time(
+blog_stm <- stm(docvars(covid_corp), 3, prevalence = ~rating + s(day), data = poliblog5k.meta))
+
+
+
 
 # Using data from the corpus
 us_tokens_1 <- tokens(US_briefing_apr1, remove_punct = TRUE, stem = TRUE, remove_numbers = FALSE, remove_symbols = TRUE, remove_url = TRUE, tolower=TRUE, remove_hyphens=TRUE) 
