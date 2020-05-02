@@ -9,7 +9,7 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## Text as Data Final Project 
+# Text as Data Final Project 
 Lakshmi Menon, Angela Marie Teng
 
 ```{r include = FALSE}
@@ -26,7 +26,8 @@ library(plyr)
 
 library(rvest)
 library(dplyr)
-
+# install.packages("proxy")
+library(proxy)
 # Loading multiple packages
 libraries <- c("foreign", "stargazer")
 lapply(libraries, require, character.only=TRUE)
@@ -54,6 +55,15 @@ packageVersion("quanteda")
 # install.packages("magicfor")
 library(magicfor)
 ```
+
+Amber Notes: 
+- So I think we can create and use different DFMs with different pre-processing methods and compare that instead of using just 1 dfm. It would be cool to see how preprocessing affects our results 
+
+**DFMS:**
+dfm <- dfm of entire corpus; dfm(covid_corp, tolower=TRUE, stem = TRUE,  remove = stopwords("english"), remove_punct = TRUE)
+dfm_trimmed <- dfm_trim(dfm, min_termfreq=20, min_docfreq=2)
+
+## Preprocessing 
 
 Loading in all the articles from rev.com:
 ```{r data_load, echo =TRUE}
@@ -173,6 +183,7 @@ save.image("./Workspaces/STM_preprocessing.RData")
 
 ```
 
+## DFM Creation 
 
 Quanteda Preprocessing and DFM creation
 ```{r echo = TRUE}
@@ -210,6 +221,7 @@ nfeat(dfm_trimmed)
 ndoc(dfm_trimmed)
 ```
 
+## LDA 
 
 LDA Topic Modeling
 ```{r lda, echo=TRUE}
@@ -249,6 +261,11 @@ top_terms_lda_20
 write.csv(top_terms_lda_20,"/Users/angelateng/Desktop/Github_Files_Teng/TaD_Final_Project/Data/top_terms_lda_20.csv")
 
 save.image("./Workspaces/LDA_topicmodel_master.RData")
+
+top_terms_lda_50 <- get_terms(lda_tm, k=50) 
+top_terms_lda_50 
+write.csv(top_terms_lda_50,"/Users/angelateng/Desktop/Github_Files_Teng/TaD_Final_Project/Data/top_terms_lda_50.csv")
+
 
 ```
 
@@ -329,6 +346,53 @@ top_5_topics_lda
 
 save.image("./Workspaces/top_5_lda_topics.RData")
 
+# add topic names from earlier 
+names(top_5_topics_lda) <- c('Country', '11: President / People / Want / Thank', '5: French-Canadian People / Help / Foreign / Support', '23: National Health Service / Hospital / Health', '8: COVID-19 Cases', '3: Work / Import / Nation / Measures')
+top_5_topics_lda
+
+```
+
+```{r topic_stability, echo = TRUE}
+# dfm trimmed is the original quanteda dfm without removing numbers 
+lda_tm_2 <- LDA(dfm_trimmed, k = 25, method = "Gibbs", iter=3000, control = list(seed = 12345))
+
+log_likelihood_2 <- lda_tm_2@loglikelihood
+log_likelihood_2
+
+similarity_between_lda_models <- simil(lda_tm@beta, lda_tm_2@beta, method = 'cosine')
+head(similarity_between_lda_models)
+
+# topic that is the closest match in the original run in terms of cosine similarity of the topic distribution over words
+match_max <- apply(similarity_between_lda_models,1, which.max)
+match_topics <- as.data.frame(cbind(seq(1:nrow(similarity_between_lda_models)), match_max))
+names(match_topics)[1] <- "LDA Topic Model 1"
+names(match_topics)[2] <- "LDA Topic Model 2"
+
+match_topics
+
+# num of words in top 10 words shared by each matched topic pair
+as.data.frame(top10_words_lda)
+
+# k = 10 for the top 10 words shared by each mateched topic pair
+top10_words_lda_2 <- get_terms(lda_tm_2, k=10)
+as.data.frame(top10_words_lda_2)
+
+# shared words
+
+# begin a counter
+shared_words_num=0
+# for loop for all the rows in match_topics table above
+for (i in 1:nrow(match_topics)) {
+   topic_number = as.numeric(match_topics$`LDA Topic Model 1`[i])
+   top10_words_new_1 = top10_words_lda[, topic_number]
+   matched_topic_number = as.numeric(match_topics$`LDA Topic Model 2`[i])
+   top10_words_new_2 = top10_words_lda_2[, matched_topic_number]
+   shared_words_num[i] = length(intersect(top10_words_new_1, top10_words_new_2))
+}
+
+match_topics$shared_words_num <- shared_words_num
+match_topics$avg_shared_words <- shared_words_num/10
+match_topics
 ```
 
 
@@ -342,6 +406,8 @@ stm <- stm(poliblog5k.docs, poliblog5k.voc, 3, prevalence = ~rating + s(day), da
 
 ```
 
+## Webscraping 
+s
 R Webscraping Code 
 ```{r scrape_text, echo = TRUE}
 
@@ -438,7 +504,7 @@ R Webscraping Code
 
 ```
 
-
+## Workspace Saving
 Saving... 
 ```{r echo=TRUE}
 # save workspace
@@ -447,7 +513,7 @@ save.image("./Workspaces/workspace_master.RData")
 
 rm(list = ls())
 
-load("./workspace_project.RData")
+load("./workspace_master.RData")
 
 ```
 
