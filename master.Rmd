@@ -260,10 +260,48 @@ top_topics_lda
 save(top_topics_lda, file = "./Data/top_topics_lda.Rdata")
 save.image("./Workspaces/top_lda_topics.RData")
 
-
+write.csv(top_topics_lda,"/Users/angelateng/Desktop/Github_Files_Teng/TaD_Final_Project/Data/lda_topics.csv")
 
 ```
 
+```{r more_lda, echo = TRUE}
+# find this for each country
+US <- top_topics_lda[top_topics_lda$country == "US" ,]
+UK <- top_topics_lda[top_topics_lda$country == "UK" ,]
+AU <- top_topics_lda[top_topics_lda$country == "AU" ,]
+NZ <- top_topics_lda[top_topics_lda$country == "NZ" ,]
+CA <- top_topics_lda[top_topics_lda$country == "CA" ,]
+unclassified <- top_topics_lda[top_topics_lda$country == "country" ,]
+
+# order by date column
+US$date <- as.numeric(US$date)
+UK$date <- as.numeric(UK$date)
+AU$date <- as.numeric(AU$date)
+NZ$date <- as.numeric(NZ$date)
+CA$date <- as.numeric(CA$date)
+
+# plot the terms for only the top 1 topic
+# US_plot
+US_plot <- ggplot(US, aes(x=date, y=top_topic, pch="Top Topic")) 
+US_plot +theme_bw() + ylab("Topic Number") + ggtitle("US Top Topics") + geom_point() + xlab(NULL) + scale_shape_manual(values=c(19, 1), name = "Topic Rank")
+
+# UK_plot
+UK_plot <- ggplot(UK, aes(x=date, y=top_topic, pch="Top Topic")) 
+UK_plot +theme_bw() + ylab("Topic Number") + ggtitle("UK Top Topics") + geom_point() + xlab(NULL) + scale_shape_manual(values=c(19, 1), name = "Topic Rank")
+
+# AU_plot
+AU_plot <- ggplot(AU, aes(x=date, y=top_topic, pch="Top Topic")) 
+AU_plot +theme_bw() + ylab("Topic Number") + ggtitle("AU Top Topics") + geom_point() + xlab(NULL) + scale_shape_manual(values=c(19, 1), name = "Topic Rank")
+
+# NZ_plot
+NZ_plot <- ggplot(NZ, aes(x=date, y=top_topic, pch="Top Topic")) 
+NZ_plot +theme_bw() + ylab("Topic Number") + ggtitle("NZ Top Topics") + geom_point() + xlab(NULL) + scale_shape_manual(values=c(19, 1), name = "Topic Rank")
+
+# US_plot
+CA_plot <- ggplot(CA, aes(x=date, y=top_topic, pch="Top Topic")) 
+CA_plot +theme_bw() + ylab("Topic Number") + ggtitle("CA Top Topics") + geom_point() + xlab(NULL) + scale_shape_manual(values=c(19, 1), name = "Topic Rank")
+
+```
 
 
 
