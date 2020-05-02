@@ -246,6 +246,8 @@ top_transcript_topics_lda
 top_terms_lda_20 <- get_terms(lda_tm, k=20) 
 top_terms_lda_20 
 
+write.csv(top_terms_lda_20,"/Users/angelateng/Desktop/Github_Files_Teng/TaD_Final_Project/Data/top_terms_lda_20.csv")
+
 save.image("./Workspaces/LDA_topicmodel_master.RData")
 
 ```
@@ -300,6 +302,32 @@ NZ_plot +theme_bw() + ylab("Topic Number") + ggtitle("NZ Top Topics") + geom_poi
 # US_plot
 CA_plot <- ggplot(CA, aes(x=date, y=top_topic, pch="Top Topic")) 
 CA_plot +theme_bw() + ylab("Topic Number") + ggtitle("CA Top Topics") + geom_point() + xlab(NULL) + scale_shape_manual(values=c(19, 1), name = "Topic Rank")
+
+save.image("./Workspaces/top_lda_topic_plots.RData")
+
+```
+
+Find the contribution of each LDA topic to each country's top topics
+```{r topic_contrib, echo = TRUE}
+topics_df_lda <- data.frame(t(data.frame(lda_topics)))
+head(topics_df_lda)
+
+save(topics_df_lda, file = "./Data/top_topics_lda_df.Rdata")
+save.image("./Workspaces/top_lda_topics_df.RData")
+
+write.csv(topics_df_lda,"/Users/angelateng/Desktop/Github_Files_Teng/TaD_Final_Project/Data/topics_df_lda.csv")
+
+names(topics_df_lda) <- seq(1:ncol(topics_df_lda))
+topics_df_lda$country <- top_topics_lda$country
+topics_df_lda
+
+write.csv(topics_df_lda,"/Users/angelateng/Desktop/Github_Files_Teng/TaD_Final_Project/Data/topics_contribution_lda.csv")
+
+# 11, 5, 23, 11, 8, 23, 5, 11, 8, 23, 3
+top_5_topics_lda <- aggregate(cbind(topics_df_lda$'11', topics_df_lda$'5', topics_df_lda$'23', topics_df_lda$'8', topics_df_lda$'3') ~ country, data=topics_df_lda, FUN=mean)
+top_5_topics_lda
+
+save.image("./Workspaces/top_5_lda_topics.RData")
 
 ```
 
