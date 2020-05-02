@@ -174,7 +174,7 @@ length(covid_corp$documents)
 processed <- textProcessor(covid_corp$documents)
 
 save.image("./Workspaces/STM_preprocessing.RData")
-
+load("./Workspaces/STM_preprocessing.RData")
 # out<- prepDocuments(processed$documents, processed$vocab, processed$meta)
 # docs <- out$documents
 # vocab <- out$vocab
@@ -284,6 +284,8 @@ write.csv(top_topics_lda,"/Users/angelateng/Desktop/Github_Files_Teng/TaD_Final_
 ```
 
 ```{r more_lda, echo = TRUE}
+load("./Workspaces/top_lda_topics.RData")
+
 # find this for each country
 US <- top_topics_lda[top_topics_lda$country == "US" ,]
 UK <- top_topics_lda[top_topics_lda$country == "UK" ,]
@@ -331,6 +333,7 @@ head(topics_df_lda)
 
 save(topics_df_lda, file = "./Data/top_topics_lda_df.Rdata")
 save.image("./Workspaces/top_lda_topics_df.RData")
+load("./Workspaces/top_lda_topics_df.RData")
 
 write.csv(topics_df_lda,"/Users/angelateng/Desktop/Github_Files_Teng/TaD_Final_Project/Data/topics_df_lda.csv")
 
@@ -346,6 +349,8 @@ top_5_topics_lda
 
 save.image("./Workspaces/top_5_lda_topics.RData")
 
+load("./Workspaces/top_5_lda_topics.RData")
+
 # add topic names from earlier 
 names(top_5_topics_lda) <- c('Country', '11: President / People / Want / Thank', '5: French-Canadian People / Help / Foreign / Support', '23: National Health Service / Hospital / Health', '8: COVID-19 Cases', '3: Work / Import / Nation / Measures')
 top_5_topics_lda
@@ -355,6 +360,9 @@ top_5_topics_lda
 ```{r topic_stability, echo = TRUE}
 # dfm trimmed is the original quanteda dfm without removing numbers 
 lda_tm_2 <- LDA(dfm_trimmed, k = 25, method = "Gibbs", iter=3000, control = list(seed = 12345))
+
+save.image("./Workspaces/top_5_lda_topics_2.RData")
+load("./Workspaces/top_5_lda_topics_2.RData")
 
 log_likelihood_2 <- lda_tm_2@loglikelihood
 log_likelihood_2
@@ -378,7 +386,6 @@ top10_words_lda_2 <- get_terms(lda_tm_2, k=10)
 as.data.frame(top10_words_lda_2)
 
 # shared words
-
 # begin a counter
 shared_words_num=0
 # for loop for all the rows in match_topics table above
@@ -509,10 +516,7 @@ Saving...
 ```{r echo=TRUE}
 # save workspace
 save.image("./Workspaces/workspace_master.RData")
-
-
 rm(list = ls())
-
 load("./workspace_master.RData")
 
 ```
