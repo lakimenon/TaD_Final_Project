@@ -44,4 +44,4 @@ for( i in 1:nrow(matches)){
 matches$date <- dates[1:120]
 
 #save.image('scraped_dates.RData')
-#saveRDS(matches, 'final_data')
+load('scraped_dates.RData')

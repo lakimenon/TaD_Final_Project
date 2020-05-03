@@ -25,8 +25,7 @@ titles <- gsub(':', '', titles)
 df$url <- Map(paste, url_prefix, titles, sep = "")
 
 #Selecting only transcripts of Country Leaders
-toMatch <- c('Trump', 'Trudeau', 'Morrison', 'Kingdom', 'Britain', 
-             'Zealand', 'Boris', 'Task', 'U.S.', 'Jacinda', 'Ardern')
+toMatch <- c('Trump', 'Trudeau', 'Morrison', 'Kingdom', 'Britain', 'Zealand', 'Boris', 'Task', 'U.S.', 'Jacinda', 'Ardern')
 matches <- df[(grepl(paste(toMatch,collapse='|'), 
                      df$title)), ]
 row.names(matches) <- NULL
