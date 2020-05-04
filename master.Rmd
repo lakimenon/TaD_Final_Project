@@ -11,12 +11,17 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Text as Data Final Project 
 Lakshmi Menon, Angela Marie Teng
+```{r echo=TRUE}
 
-```{r include = FALSE}
 # get current working directory
 rm(list = ls())
 getwd()  
 # setwd("~/Data/articles")
+
+```
+
+```{r include = FALSE}
+
 
 # loading packages 
 library(dplyr)
@@ -62,6 +67,8 @@ Amber Notes:
 **DFMS:**
 dfm <- dfm of entire corpus; dfm(covid_corp, tolower=TRUE, stem = TRUE,  remove = stopwords("english"), remove_punct = TRUE)
 dfm_trimmed <- dfm_trim(dfm, min_termfreq=20, min_docfreq=2)
+
+dfm_2 <- removing numbers from here 
 
 ## Preprocessing 
 
@@ -198,6 +205,16 @@ num_tokens
 dfm <- dfm(covid_corp, tolower=TRUE, stem = TRUE,  remove = stopwords("english"), remove_punct = TRUE)
 dfm
 
+# remove speaker from stopwords
+
+tad_stopwords <- c("speaker","inaudible", "foreign language")
+
+?textProcessor
+dfm_2 <- dfm(covid_corp, tolower=TRUE, stem = TRUE,  remove = c(stopwords("english"), tad_stopwords), remove_punct = TRUE, remove_numbers = TRUE)
+dfm_2
+
+save.image("./Workspaces/dfm_2.RData")
+
 ```
 
 Basic EDA by country - the countries that say country aren't associated with our keywords (do not have our keywords in the title)
@@ -219,6 +236,12 @@ head(dfm_trimmed)
 nfeat(dfm_trimmed)
 # total num of documents 
 ndoc(dfm_trimmed)
+
+
+dfm_trimmed_2 <- dfm_trim(dfm_2, min_termfreq = 20, min_docfreq = 2)
+head(dfm_trimmed_2)
+nfeat(dfm_trimmed_2)
+ndoc(dfm_trimmed_2)
 ```
 
 ## LDA 
@@ -517,7 +540,7 @@ Saving...
 # save workspace
 save.image("./Workspaces/workspace_master.RData")
 rm(list = ls())
-load("./workspace_master.RData")
+load("./Workspaces/workspace_master.RData")
 
 ```
 
