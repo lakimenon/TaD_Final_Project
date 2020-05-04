@@ -71,6 +71,8 @@ library(gridExtra)
 library(bursts)
 
 library(readtext)
+
+library(lsa)
 ```
 
 Amber Notes: 
@@ -80,7 +82,12 @@ Amber Notes:
 dfm <- dfm of entire corpus; dfm(covid_corp, tolower=TRUE, stem = TRUE,  remove = stopwords("english"), remove_punct = TRUE)
 dfm_trimmed <- dfm_trim(dfm, min_termfreq=20, min_docfreq=2)
 
+
 dfm_2 <- removing numbers from here 
+
+Actual DFM used for everything: 
+dfm_2 <- dfm(covid_corp, tolower=TRUE, stem = TRUE,  remove = c(stopwords("english"), tad_stopwords), remove_punct = TRUE, remove_numbers = TRUE, remove_url = TRUE, remove_hyphens = TRUE, remove_symbols = TRUE)
+dfm_2
 
 ## Preprocessing 
 
@@ -222,6 +229,8 @@ dfm
 tad_stopwords <- c("speaker","inaudible", "foreign language")
 
 ?textProcessor
+
+# ACTUAL DFM USED FOR EVERYTHING
 dfm_2 <- dfm(covid_corp, tolower=TRUE, stem = TRUE,  remove = c(stopwords("english"), tad_stopwords), remove_punct = TRUE, remove_numbers = TRUE, remove_url = TRUE, remove_hyphens = TRUE, remove_symbols = TRUE)
 dfm_2
 
@@ -836,11 +845,84 @@ load("./Workspaces/burstiness.RData")
 ```
 
 ## Dimension Reduction and Semantics 
+
+### subset to US News (new dfm)
 ```{r echo = TRUE}
 
+# subset the corpus to only pick category in world news
+us_corpus <- corpus_subset(covid_corp, country %in% c('US'))
+us_corpus 
 
+us_dfm <- dfm(us_corpus, tolower=TRUE, stem = TRUE,  remove = c(stopwords("english"), tad_stopwords), remove_punct = TRUE, remove_numbers = TRUE, remove_url = TRUE, remove_hyphens = TRUE, remove_symbols = TRUE)
+us_dfm
+
+# create a matrix
+us_matrix <- convert(us_dfm, to = "matrix") 
+```
+
+### PCA
+```{r echo = TRUE}
+# get PCA
+us_pca <- prcomp(us_matrix, center = TRUE, scale = TRUE)
+# worldnews_pca
+# sanity check
+us_pca$rotation[1:10, 1:5]
+
+save.image("./Workspaces/pca.RData")
+load("./Workspaces/pca.RData")
+```
+
+
+### top 5 positive and negative words in US subset
+```{r echo = TRUE}
+# rank according to loadings
+us_pcomp1 <- sort(us_pca$rotation[,1], decreasing = T)
+head(us_pcomp1)
+
+us_pccomp1_increasing <- sort(us_pca$rotation[,1])
+head(us_pccomp1_increasing)
+
+
+top5_positive_words_us <- us_pcomp1[1:5]
+top5_positive_words_us
+
+
+top5_negative_words_us <- us_pccomp1_increasing[1:5]
+top5_negative_words_us
+
+save.image("./Workspaces/top5_pos_words.RData")
+load("./Workspaces/top5_pos_words.RData")
+```
+
+## LSA
+```{r echo = TRUE}
+# convert dfm to lsa
+us_matrix_lsa <- convert(us_dfm, to = "lsa") 
+
+us_matrix_lsa <- lw_logtf(us_matrix_lsa) * gw_idf(us_matrix_lsa)
+head(us_matrix_lsa, 10)
+
+
+save.image("./Workspaces/lsa.RData")
+load("./Workspaces/lsa.RData")
+
+
+# Find close terms in a textmatrix 
+associate(us_matrix_lsa, "coronavirus", "cosine", threshold = .2)[1:5]
+
+
+# Find close terms in a textmatrix 
+associate(us_matrix_lsa, "case", "cosine", threshold = .2)[1:5]
+
+# Find close terms in a textmatrix 
+associate(us_matrix_lsa, "health", "cosine", threshold = .2)[1:5]
+
+save.image("./Workspaces/lsa.RData")
+load("./Workspaces/lsa.RData")
 
 ```
+
+
 
 ## Webscraping 
 R Webscraping Code 
