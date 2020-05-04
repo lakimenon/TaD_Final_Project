@@ -709,12 +709,122 @@ time <- estimateEffect(c(51) ~ date, transcript_stm, meta=df_2_stm)
 plot(time, "date", transcript_stm, method="continuous", xaxt = "n", xlab="Date")
 ```
 
+## Wordfish (Non-Parametric Scaling)
+
+### New DFM for US and NZ (subset)
+```{r echo = TRUE}
+# pick a subset with only NZ and US
+
+subset_nz_us_corpus <- corpus_subset(covid_corp, country %in% c('US', 'NZ'))
+
+save.image("./Workspaces/wordfish.RData")
+load("./Workspaces/wordfish.RData")
+
+nz_us_dfm <- dfm(subset_nz_us_corpus, tolower=TRUE, stem = TRUE,  remove = c(stopwords("english"), tad_stopwords), remove_punct = TRUE, remove_numbers = TRUE, remove_url = TRUE, remove_hyphens = TRUE, remove_symbols = TRUE)
+nz_us_dfm
+
+save.image("./Workspaces/nz_us_dfm.RData")
+load("./Workspaces/nz_us_dfm.RData")
+
+```
+
+Quanteda’s implementation of Wordfish, textmodel wordfish, requires that we provide the indices for a pair of documents to globally identify θ, the latent dimension of interest. In this case, we are looking to estimate the latent covid ideological dimension. Use the indices of the 1979 Labor and Conservative manifestos to do so. That is, set dir = c(index of 1979 Labor manifesto, index of 1979 Conservative manifesto).
+
+```{r echo = TRUE}
+
+corpus_index <- data.frame(subset_nz_us_corpus$documents)
+corpus_index
+
+# Date 13 US transcript
+idx_13_us <- which(corpus_index$country == "US" & corpus_index$date == "Apr 14, 2020")
+idx_13_us
+# 1979 Conservative manifestos
+idx_13_nz <- which(corpus_index$country == "NZ" & corpus_index$date == "Apr 14, 2020")
+idx_13_nz 
+
+# dir = c(index of 1979 Labor manifesto, index of 1979 Conservative manifesto)
+dir  = c(idx_13_us,  idx_13_nz)
+dir
+
+us_nz_wordfish <- textmodel_wordfish(nz_us_dfm, dir)
+us_nz_wordfish
+
+summary(us_nz_wordfish)
+
+save.image("./Workspaces/wf_model.RData")
+load("./Workspaces/wf_model.RData")
 
 
+# turn wordfish model into a df to find the max theta
+us_nz_wordfish_df <- data.frame(cbind(us_nz_wordfish$theta, corpus_index$country, corpus_index$date))
+us_nz_wordfish_df
+
+# not sure what a high theta means?? discuss this later
+most_leftwing_transcript <- us_nz_wordfish_df[which.max(us_nz_wordfish_df$X1),]
+most_leftwing_transcript
+
+most_rightwing_transcript <- us_nz_wordfish_df[which.min(us_nz_wordfish_df$X1),]
+most_rightwing_transcript
+
+
+save.image("./Workspaces/wf_model_theta.RData")
+load("./Workspaces/wf_model_theta.RData")
+```
+
+## Burstiness
+```{r echo = TRUE}
+
+# load news data 
+news_data <- readRDS("news_data.rds")
+# use headlines only 
+news_data_corpus <- corpus(news_data, text_field = 'headline')
+docvars(news_data_corpus)$date <- as.Date(as.character(docvars(news_data_corpus)$date))
+# create dfm 
+news_dfm <- dfm(news_data_corpus)
+
+bursty <- function(word, DTM, date) {
+  word.vec <- DTM[, which(colnames(DTM) == word)]
+  if(length(word.vec) == 0) {
+    print(paste(word, " does not exist in this corpus."))
+    return()
+  } 
+  else {
+    word.times <- c(0,which(as.vector(word.vec)>0))
+    
+    kl <- kleinberg(word.times, gamma = 0.5)
+    kl$start <- date[kl$start+1]
+    kl$end <- date[kl$end]
+    max_level <- max(kl$level)
+    
+    plot(c(kl$start[1], kl$end[1]), c(1,max_level),
+         type = "n", xlab = "Time", ylab = "Level", bty = "n",
+         xlim = c(min(date), max(date)), ylim = c(1, max_level),
+         yaxt = "n")
+    axis(2, at = 1:max_level)
+    
+    for (i in 1:nrow(kl)) {
+      if (kl$start[i] != kl$end[i]) {
+        arrows(kl$start[i], kl$level[i], kl$end[i], kl$level[i], code = 3, angle = 90,
+               length = 0.05)
+      } 
+      else {
+        points(kl$start[i], kl$level[i])
+      }
+    }
+    
+    print(kl)
+  }
+  #note deviation from standard defaults bec don't have that much data
+}
+
+
+# 3.1 Evaluating the burstiness of several key words
+bursty("obama", news_dfm, docvars(news_data_corpus)$date)
+
+```
 
 
 ## Webscraping 
-s
 R Webscraping Code 
 ```{r scrape_text, echo = TRUE}
 
