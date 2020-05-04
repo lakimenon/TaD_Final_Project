@@ -67,6 +67,10 @@ library(geometry)
 
 
 library(gridExtra)
+
+library(bursts)
+
+library(readtext)
 ```
 
 Amber Notes: 
@@ -773,14 +777,7 @@ load("./Workspaces/wf_model_theta.RData")
 
 ## Burstiness
 ```{r echo = TRUE}
-
-# load news data 
-news_data <- readRDS("news_data.rds")
-# use headlines only 
-news_data_corpus <- corpus(news_data, text_field = 'headline')
-docvars(news_data_corpus)$date <- as.Date(as.character(docvars(news_data_corpus)$date))
-# create dfm 
-news_dfm <- dfm(news_data_corpus)
+# use the same dfm 2 
 
 bursty <- function(word, DTM, date) {
   word.vec <- DTM[, which(colnames(DTM) == word)]
@@ -816,13 +813,34 @@ bursty <- function(word, DTM, date) {
   }
   #note deviation from standard defaults bec don't have that much data
 }
+docvars(covid_corp)$num_date <- as.numeric(as.POSIXct(covid_corp$documents$date, format="%b %d, %Y"))
+# docvars(covid_corp)$date <- as.numeric(gsub("[[:alpha:]]","", docvars(covid_corp)$date))
 
+
+save.image("./Workspaces/burstiness.RData")
+load("./Workspaces/burstiness.RData")
 
 # 3.1 Evaluating the burstiness of several key words
-bursty("obama", news_dfm, docvars(news_data_corpus)$date)
+bursty("covid", dfm_2, docvars(covid_corp)$num_date)
 
+# need the years here
+bursty("coronavirus", dfm_2, docvars(covid_corp)$num_date)
+
+# need the years here
+bursty("case", dfm_2, docvars(covid_corp)$num_date)
+
+bursty("health", dfm_2, docvars(covid_corp)$num_date)
+
+save.image("./Workspaces/burstiness.RData")
+load("./Workspaces/burstiness.RData")
 ```
 
+## Dimension Reduction and Semantics 
+```{r echo = TRUE}
+
+
+
+```
 
 ## Webscraping 
 R Webscraping Code 
