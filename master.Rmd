@@ -19,7 +19,7 @@ getwd()
 # setwd("~/Data/articles")
 
 ```
-
+## Loading Libraries
 ```{r include = FALSE}
 
 
@@ -59,6 +59,14 @@ lapply(libraries, require, character.only = T)
 packageVersion("quanteda")
 # install.packages("magicfor")
 library(magicfor)
+
+
+library(Rtsne)
+library(rsvd)
+library(geometry)
+
+
+library(gridExtra)
 ```
 
 Amber Notes: 
@@ -642,46 +650,68 @@ date
 ```
 Fit an STM model where the topic content varies according to this binary variable, and where the prevalence varies according to both this binary variable and the spline of the date variable you’ve created. Be sure to use the spectral initialization and set k=0, which will allow the STM function to automatically select a number of topics using the spec- tral learning method. Keep in mind that this function is computationally demanding, so start with the minimum threshold document frequency threshold set to 10; if your computer takes an unreasonably long time to fit the STM model with this threshold, you can raise it to as high as 30. Report the number of topics selected in the fitted model. Also report the number of iterations completed before the model converged.
 
+## STM 
+
+Identify and name each of the 5 topics that occur in the highest proportion of documents using the following code: plot(fit.stm, type = “summary”)
 ```{r echo = TRUE}
 # convert our dfm into a dataframe
+dfm_2
 
-dfm_2_stm <- as.data.frame(cbind(covid_corp$documents$texts, covid_corp$documents$date, covid_corp$documents$country))
-dfm_2_stm
+df_2_stm <- as.data.frame(cbind(covid_corp$documents$texts, covid_corp$documents$date, covid_corp$documents$country))
+df_2_stm
 
 
 save.image("./Workspaces/topic_models_w_covariates.RData")
 load("./Workspaces/topic_models_w_covariates.RData")
 
 # set the columns
-names(stm_df) <- c("texts", "day", "paperName")
-stm_df$paperName <- as.factor(stm_df$paperName)
-stm_df$day <- date
-stm_df$texts <- as.character(stm_df$texts)
-# stm_df
+names(df_2_stm) <- c("texts", "date", "country")
+df_2_stm$country <- as.factor(df_2_stm$country)
+df_2_stm$date <- date
+df_2_stm$texts <- as.character(df_2_stm$texts)
+df_2_stm
 
-# install.packages("Rtsne")
-# install.packages("rsvd")
-# install.packages("geometry")
-library(Rtsne)
-library(rsvd)
-library(geometry)
+save.image("./Workspaces/stm_dfm.RData")
+load("./Workspaces/stm_dfm.RData")
+
 
 system.time(
-news_stm <- stm(stm_dfm, K=0, init.type='Spectral', seed=12345, prevalence =~paperName + s(day),  data=stm_df))
+transcript_stm <- stm(dfm_2, K=0, init.type='Spectral', seed=12345, prevalence =~country + s(date), content =~country, data=dfm_2_stm))
+
+save.image("./Workspaces/stm_dfm_model.RData")
+load("./Workspaces/stm_dfm_model.RData")
+transcript_stm 
+
+stm_plot <- plot(transcript_stm, type='summary')
+```
 
 
+Using the visualization commands in the stm package, discuss one of these top 5 topics. How does the content vary with the country discussing that topic? How does the prevalence change over time?
+
+```{r echo = TRUE}
+save.image("./Workspaces/stm_plot.RData")
+load("./Workspaces/stm_plot.RData")
+
+country <- estimateEffect(c(56) ~ country, transcript_stm, meta=df_2_stm)
+
+# need to pick 2 countries here     
+au_ca_plot <- plot(transcript_stm, type = "perspectives", topics = c(56))
+au_ca_plot 
+# plot(country, "country", model = transcript_stm,
+#      method = "difference", cov.value1 = "US", cov.value2 = "UK", cov.value3 = "CA", cov.value4 = "NZ", cov.value5 = "AU", cov.value6 = "other")
+
+# plot(country, "country", model = transcript_stm,
+#      method = "difference", cov.value1 = "US", cov.value2 = "other")
+
+# How does the prevalence change over time?
+time <- estimateEffect(c(51) ~ date, transcript_stm, meta=df_2_stm)
+
+plot(time, "date", transcript_stm, method="continuous", xaxt = "n", xlab="Date")
 ```
 
 
 
-```{r stm, echo=TRUE}
 
-system.time(
-stm <- stm(poliblog5k.docs, poliblog5k.voc, 3, prevalence = ~rating + s(day), data = poliblog5k.meta))
-
-
-
-```
 
 ## Webscraping 
 s
