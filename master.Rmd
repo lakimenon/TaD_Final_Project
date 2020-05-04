@@ -628,12 +628,49 @@ load("./Workspaces/match_topics_DFM2.RData")
 
 ## Topic Models with Covariates
 
+The Structural Topic Model (STM) is designed to incorporate document-level variables into a standard topic model. Since, we have information about both the country and the date of the transcripts, we can use an STM (from the stm package) to model the eﬀects of these covariates directly.
 ```{r echo = TRUE}
+# incorporate date
+# date <- as.numeric(covid_corp$documents$date)
+# NAs introduced by coercion --> not sure what this means
+# https://stackoverflow.com/questions/8215404/change-from-date-and-hour-format-to-numeric-format
 
+date <- as.POSIXct(covid_corp$documents$date, format="%b %d, %Y")
+date <- as.numeric(date)
+date
+
+```
+Fit an STM model where the topic content varies according to this binary variable, and where the prevalence varies according to both this binary variable and the spline of the date variable you’ve created. Be sure to use the spectral initialization and set k=0, which will allow the STM function to automatically select a number of topics using the spec- tral learning method. Keep in mind that this function is computationally demanding, so start with the minimum threshold document frequency threshold set to 10; if your computer takes an unreasonably long time to fit the STM model with this threshold, you can raise it to as high as 30. Report the number of topics selected in the fitted model. Also report the number of iterations completed before the model converged.
+
+```{r echo = TRUE}
+# convert our dfm into a dataframe
+
+dfm_2_stm <- as.data.frame(cbind(covid_corp$documents$texts, covid_corp$documents$date, covid_corp$documents$country))
+dfm_2_stm
+
+
+save.image("./Workspaces/topic_models_w_covariates.RData")
+load("./Workspaces/topic_models_w_covariates.RData")
+
+# set the columns
+names(stm_df) <- c("texts", "day", "paperName")
+stm_df$paperName <- as.factor(stm_df$paperName)
+stm_df$day <- date
+stm_df$texts <- as.character(stm_df$texts)
+# stm_df
+
+# install.packages("Rtsne")
+# install.packages("rsvd")
+# install.packages("geometry")
+library(Rtsne)
+library(rsvd)
+library(geometry)
+
+system.time(
+news_stm <- stm(stm_dfm, K=0, init.type='Spectral', seed=12345, prevalence =~paperName + s(day),  data=stm_df))
 
 
 ```
-
 
 
 
