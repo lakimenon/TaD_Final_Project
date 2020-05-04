@@ -178,10 +178,10 @@ length(covid_corp$documents)
 
 # note: this code is very slow
 # apply STM Vignette recommended preprocessing
-processed <- textProcessor(covid_corp$documents)
+# processed <- textProcessor(covid_corp$documents)
 
-save.image("./Workspaces/STM_preprocessing.RData")
-load("./Workspaces/STM_preprocessing.RData")
+# save.image("./Workspaces/STM_preprocessing.RData")
+# load("./Workspaces/STM_preprocessing.RData")
 # out<- prepDocuments(processed$documents, processed$vocab, processed$meta)
 # docs <- out$documents
 # vocab <- out$vocab
@@ -210,7 +210,7 @@ dfm
 tad_stopwords <- c("speaker","inaudible", "foreign language")
 
 ?textProcessor
-dfm_2 <- dfm(covid_corp, tolower=TRUE, stem = TRUE,  remove = c(stopwords("english"), tad_stopwords), remove_punct = TRUE, remove_numbers = TRUE)
+dfm_2 <- dfm(covid_corp, tolower=TRUE, stem = TRUE,  remove = c(stopwords("english"), tad_stopwords), remove_punct = TRUE, remove_numbers = TRUE, remove_url = TRUE, remove_hyphens = TRUE, remove_symbols = TRUE)
 dfm_2
 
 save.image("./Workspaces/dfm_2.RData")
@@ -242,11 +242,12 @@ dfm_trimmed_2 <- dfm_trim(dfm_2, min_termfreq = 20, min_docfreq = 2)
 head(dfm_trimmed_2)
 nfeat(dfm_trimmed_2)
 ndoc(dfm_trimmed_2)
+save.image("./Workspaces/dfm_2_new.RData")
 ```
 
 ## LDA 
 
-LDA Topic Modeling
+### LDA Topic Modeling
 ```{r lda, echo=TRUE}
 lda_tm <- LDA(dfm_trimmed, k = 25, method = "Gibbs", iter=3000, control = list(seed = 1234))
 lda_tm
@@ -266,14 +267,14 @@ save.image("./Workspaces/LDA_topicmodel_top10words.RData")
 
 # find most likely topic for each country
 most_likely_topics_lda <- topics(lda_tm)
-# most_likely_topics_lda
+most_likely_topics_lda
 
 lda_topics <- lda_tm@gamma
 lda_topics <- t(lda_topics)
 
 most_prob_topic_lda <- apply(lda_topics, 2, which.max)
 table_prob_topics_lda <- table(most_prob_topic_lda)
-# table_prob_topics_lda 
+table_prob_topics_lda
 
 # sort the table
 top_transcript_topics_lda <- sort(table(most_prob_topic_lda), decreasing=TRUE)
@@ -292,8 +293,55 @@ write.csv(top_terms_lda_50,"/Users/angelateng/Desktop/Github_Files_Teng/TaD_Fina
 
 ```
 
+### DFM 2 - LDA
+```{r lda2, echo = TRUE}
+# lda on DFM 2
+lda_tm_2 <- LDA(dfm_trimmed_2, k = 25, method = "Gibbs", iter=3000, control = list(seed = 1234))
+lda_tm_2
 
-Examine top contribuuting topics
+save.image("./Workspaces/LDA_topicmodel_2.RData")
+
+log_likelihood_lda_2 <- lda_tm_2@loglikelihood
+log_likelihood_lda_2
+
+# get top 10 words that contribute to each topic 
+top10_words_lda_2_2 <- get_terms(lda_tm_2, k=10)
+top10_words_lda_2_2
+
+# save the  top  10  words  over  all  25  topics,  for  later  use.
+save(top10_words_lda_2_2, file = "./Data/top10words_lda_2.Rdata")
+
+save.image("./Workspaces/LDA_topicmodel_top10words_2.RData")
+
+# find most likely topic for each country
+most_likely_topics_lda_2 <- topics(lda_tm_2)
+most_likely_topics_lda_2
+
+lda_topics_2 <- lda_tm_2@gamma
+lda_topics_2 <- t(lda_topics_2)
+
+most_prob_topic_lda_2 <- apply(lda_topics_2, 2, which.max)
+table_prob_topics_lda_2 <- table(most_prob_topic_lda_2)
+table_prob_topics_lda_2
+
+# sort the table
+top_transcript_topics_lda_2 <- sort(table(most_prob_topic_lda_2), decreasing=TRUE)
+top_transcript_topics_lda_2
+top_terms_lda_20_2 <- get_terms(lda_tm_2, k=20) 
+top_terms_lda_20_2 
+
+write.csv(top_terms_lda_20_2,"/Users/angelateng/Desktop/Github_Files_Teng/TaD_Final_Project/Data/top_terms_lda_20_2.csv")
+
+save.image("./Workspaces/LDA_topicmodel_master_2.RData")
+
+top_terms_lda_50_2 <- get_terms(lda_tm_2, k=50) 
+top_terms_lda_50_2
+write.csv(top_terms_lda_50_2,"/Users/angelateng/Desktop/Github_Files_Teng/TaD_Final_Project/Data/top_terms_lda_50_2.csv")
+
+
+```
+
+### Examine top contribuuting topics
 ```{r top_lda, echo = True}
 
 top_topics_lda <- data.frame(title = covid_corp$documents$title, country = covid_corp$documents$country, top_topic = most_prob_topic_lda, date = covid_corp$documents$date)
@@ -304,7 +352,19 @@ save.image("./Workspaces/top_lda_topics.RData")
 
 write.csv(top_topics_lda,"/Users/angelateng/Desktop/Github_Files_Teng/TaD_Final_Project/Data/lda_topics.csv")
 
+# for dfm 2
+top_topics_lda_2 <- data.frame(title = covid_corp$documents$title, country = covid_corp$documents$country, top_topic = most_prob_topic_lda_2, date = covid_corp$documents$date)
+top_topics_lda_2
+
+save(top_topics_lda_2, file = "./Data/top_topics_lda_2.Rdata")
+save.image("./Workspaces/top_lda_topics_2.RData")
+
+write.csv(top_topics_lda_2,"/Users/angelateng/Desktop/Github_Files_Teng/TaD_Final_Project/Data/lda_topics_2.csv")
+
 ```
+
+
+
 
 ```{r more_lda, echo = TRUE}
 load("./Workspaces/top_lda_topics.RData")
@@ -349,7 +409,56 @@ save.image("./Workspaces/top_lda_topic_plots.RData")
 
 ```
 
-Find the contribution of each LDA topic to each country's top topics
+### Lda for DFM 2
+```{r echo = TRUE}
+
+load("./Workspaces/top_lda_topics_2.RData")
+
+# find this for each country
+US <- top_topics_lda_2[top_topics_lda_2$country == "US" ,]
+UK <- top_topics_lda_2[top_topics_lda_2$country == "UK" ,]
+AU <- top_topics_lda_2[top_topics_lda_2$country == "AU" ,]
+NZ <- top_topics_lda_2[top_topics_lda_2$country == "NZ" ,]
+CA <- top_topics_lda_2[top_topics_lda_2$country == "CA" ,]
+unclassified <- top_topics_lda_2[top_topics_lda_2$country == "country" ,]
+
+# order by date column
+US$date <- as.numeric(US$date)
+UK$date <- as.numeric(UK$date)
+AU$date <- as.numeric(AU$date)
+NZ$date <- as.numeric(NZ$date)
+CA$date <- as.numeric(CA$date)
+
+# plot the terms for only the top 1 topic
+# US_plot
+US_plot_2 <- ggplot(US, aes(x=date, y=top_topic, pch="Top Topic")) 
+US_plot +theme_bw() + ylab("Topic Number") + ggtitle("US Top Topics") + geom_point() + xlab(NULL) + scale_shape_manual(values=c(19, 1), name = "Topic Rank")
+
+# UK_plot
+UK_plot <- ggplot(UK, aes(x=date, y=top_topic, pch="Top Topic")) 
+UK_plot +theme_bw() + ylab("Topic Number") + ggtitle("UK Top Topics") + geom_point() + xlab(NULL) + scale_shape_manual(values=c(19, 1), name = "Topic Rank")
+
+# AU_plot
+AU_plot <- ggplot(AU, aes(x=date, y=top_topic, pch="Top Topic")) 
+AU_plot +theme_bw() + ylab("Topic Number") + ggtitle("AU Top Topics") + geom_point() + xlab(NULL) + scale_shape_manual(values=c(19, 1), name = "Topic Rank")
+
+# NZ_plot
+NZ_plot <- ggplot(NZ, aes(x=date, y=top_topic, pch="Top Topic")) 
+NZ_plot +theme_bw() + ylab("Topic Number") + ggtitle("NZ Top Topics") + geom_point() + xlab(NULL) + scale_shape_manual(values=c(19, 1), name = "Topic Rank")
+
+# US_plot
+CA_plot <- ggplot(CA, aes(x=date, y=top_topic, pch="Top Topic")) 
+CA_plot +theme_bw() + ylab("Topic Number") + ggtitle("CA Top Topics") + geom_point() + xlab(NULL) + scale_shape_manual(values=c(19, 1), name = "Topic Rank")
+
+save.image("./Workspaces/top_lda_topic_plots_2.RData")
+
+
+
+
+```
+
+
+### Find the contribution of each LDA topic to each country's top topics
 ```{r topic_contrib, echo = TRUE}
 topics_df_lda <- data.frame(t(data.frame(lda_topics)))
 head(topics_df_lda)
@@ -366,6 +475,7 @@ topics_df_lda
 
 write.csv(topics_df_lda,"/Users/angelateng/Desktop/Github_Files_Teng/TaD_Final_Project/Data/topics_contribution_lda.csv")
 
+most_likely_topics_lda
 # 11, 5, 23, 11, 8, 23, 5, 11, 8, 23, 3
 top_5_topics_lda <- aggregate(cbind(topics_df_lda$'11', topics_df_lda$'5', topics_df_lda$'23', topics_df_lda$'8', topics_df_lda$'3') ~ country, data=topics_df_lda, FUN=mean)
 top_5_topics_lda
@@ -380,6 +490,46 @@ top_5_topics_lda
 
 ```
 
+### Trying this for DFM 2 
+```{r echo = TRUE}
+topics_df_lda_2 <- data.frame(t(data.frame(lda_topics_2)))
+head(topics_df_lda_2)
+
+save(topics_df_lda_2, file = "./Data/top_topics_lda_df_2.Rdata")
+save.image("./Workspaces/top_lda_topics_df_2.RData")
+load("./Workspaces/top_lda_topics_df_2.RData")
+
+write.csv(topics_df_lda_2,"/Users/angelateng/Desktop/Github_Files_Teng/TaD_Final_Project/Data/topics_df_lda_2.csv")
+
+
+names(topics_df_lda_2) <- seq(1:ncol(topics_df_lda_2))
+topics_df_lda_2$country <- top_topics_lda_2$country
+topics_df_lda_2
+
+write.csv(topics_df_lda_2,"/Users/angelateng/Desktop/Github_Files_Teng/TaD_Final_Project/Data/topics_contribution_lda_2.csv")
+most_likely_topics_lda_2
+# 13, 15, 25, 2,24, 5, 15, 13, 24, 12, 14
+top_5_topics_lda_2 <- aggregate(cbind(topics_df_lda_2$'13', topics_df_lda_2$'15', topics_df_lda_2$'25', topics_df_lda_2$'2', topics_df_lda_2$'24') ~ country, data=topics_df_lda_2, FUN=mean)
+top_5_topics_lda_2
+
+save.image("./Workspaces/top_5_lda_topics_2.RData")
+
+load("./Workspaces/top_5_lda_topics_2.RData")
+
+top_terms_lda_50_2
+# add topic names from earlier 
+names(top_5_topics_lda_2) <- c('Country', '13: The People', '15: French-Canadian People', '25: Social Distancing', '2: Reopening', '24: COVID-19 Cases')
+top_5_topics_lda_2
+
+
+
+
+
+```
+
+
+
+Topic Stability 
 ```{r topic_stability, echo = TRUE}
 # dfm trimmed is the original quanteda dfm without removing numbers 
 lda_tm_2 <- LDA(dfm_trimmed, k = 25, method = "Gibbs", iter=3000, control = list(seed = 12345))
@@ -424,6 +574,66 @@ match_topics$shared_words_num <- shared_words_num
 match_topics$avg_shared_words <- shared_words_num/10
 match_topics
 ```
+
+## Topic Stability for DFM 2 
+```{r echo = TRUE}
+
+# dfm trimmed is the newl quanteda dfm without numbers 
+lda_tm_2_2 <- LDA(dfm_trimmed_2, k = 25, method = "Gibbs", iter=3000, control = list(seed = 12345))
+
+save.image("./Workspaces/top_5_lda_topics_2_2.RData")
+load("./Workspaces/top_5_lda_topics_2_2.RData")
+
+log_likelihood_2_2 <- lda_tm_2_2@loglikelihood
+log_likelihood_2_2
+
+similarity_between_lda_models_2 <- simil(lda_tm_2@beta, lda_tm_2_2@beta, method = 'cosine')
+head(similarity_between_lda_models_2)
+
+# topic that is the closest match in the original run in terms of cosine similarity of the topic distribution over words
+match_max_2 <- apply(similarity_between_lda_models_2,1, which.max)
+match_topics_2 <- as.data.frame(cbind(seq(1:nrow(similarity_between_lda_models_2)), match_max_2))
+names(match_topics_2)[1] <- "LDA Topic Model 1, DFM 2"
+names(match_topics_2)[2] <- "LDA Topic Model 2, DFM 2"
+
+match_topics_2
+
+# num of words in top 10 words shared by each matched topic pair
+as.data.frame(top10_words_lda_2_2)
+
+# k = 10 for the top 10 words shared by each mateched topic pair
+top10_words_lda_2_2_2 <- get_terms(lda_tm_2_2, k=10)
+as.data.frame(top10_words_lda_2_2_2)
+
+# shared words
+# begin a counter
+shared_words_num_2=0
+# for loop for all the rows in match_topics table above
+for (i in 1:nrow(match_topics_2)) {
+   topic_number = as.numeric(match_topics_2$`LDA Topic Model 1, DFM 2`[i])
+   top10_words_new_1 = top10_words_lda_2_2[, topic_number]
+   matched_topic_number = as.numeric(match_topics$`LDA Topic Model 2, DFM 2`[i])
+   top10_words_new_2 = top10_words_lda_2_2_2[, matched_topic_number]
+   shared_words_num[i] = length(intersect(top10_words_new_1, top10_words_new_2))
+}
+
+match_topics_2$shared_words_num <- shared_words_num_2
+match_topics_2$avg_shared_words <- shared_words_num_2/10
+match_topics_2
+
+save.image("./Workspaces/match_topics_DFM2.RData")
+load("./Workspaces/match_topics_DFM2.RData")
+```
+
+
+## Topic Models with Covariates
+
+```{r echo = TRUE}
+
+
+
+```
+
 
 
 
