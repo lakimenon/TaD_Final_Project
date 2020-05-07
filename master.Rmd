@@ -912,7 +912,7 @@ load("./Workspaces/lsa.RData")
 
 # Find close terms in a textmatrix 
 associate(us_matrix_lsa, "coronavirus", "cosine", threshold = .2)[1:5]
-
+associate(us_matrix_lsa, "coronavirus", "cosine", threshold = .2)[1:10]
 
 # Find close terms in a textmatrix 
 associate(us_matrix_lsa, "case", "cosine", threshold = .2)[1:5]
