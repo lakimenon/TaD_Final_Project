@@ -137,6 +137,9 @@ colnames(matches)
 typeof(matches)
 attributes(matches)
 
+# write.csv(matches,"/Users/angelateng/Desktop/Github_Files_Teng/TaD_Final_Project/Data/matches.csv")
+
+
 ```
 
 ```{r subset_data, echo=TRUE}
