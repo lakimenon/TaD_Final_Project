@@ -139,7 +139,7 @@ attributes(matches)
 
 # write.csv(matches,"/Users/angelateng/Desktop/Github_Files_Teng/TaD_Final_Project/Data/matches.csv")
 
-
+grepl("country", matches$country)
 ```
 
 ```{r subset_data, echo=TRUE}
@@ -175,6 +175,7 @@ write.csv(df,"/Users/angelateng/Desktop/Github_Files_Teng/TaD_Final_Project/Data
 
 
 head(covid_corp)
+covid_corp[,covid_corp$country]
 # a corpus consists ofs: (1) documents: text + doc level data (2) corpus metadata (3) extras (settings)
 head(docvars(covid_corp))  # document-level variables
 metacorpus(covid_corp)  # corpus-level variables
@@ -906,6 +907,112 @@ load("./Workspaces/top5_pos_words.RData")
 
 ## LSA
 ```{r echo = TRUE}
+
+# subset the corpus to only pick category in world news
+uk_corpus <- corpus_subset(covid_corp, country %in% c('UK'))
+uk_corpus 
+
+uk_dfm <- dfm(uk_corpus, tolower=TRUE, stem = TRUE,  remove = c(stopwords("english"), tad_stopwords), remove_punct = TRUE, remove_numbers = TRUE, remove_url = TRUE, remove_hyphens = TRUE, remove_symbols = TRUE)
+uk_dfm
+
+# create a matrix
+uk_matrix <- convert(uk_dfm, to = "matrix") 
+
+# convert dfm to lsa
+uk_matrix_lsa <- convert(uk_dfm, to = "lsa") 
+
+uk_matrix_lsa <- lw_logtf(uk_matrix_lsa) * gw_idf(uk_matrix_lsa)
+head(uk_matrix_lsa, 10)
+associate(uk_matrix_lsa, "coronavirus", "cosine", threshold = .2)[1:10]
+
+
+
+
+# subset the corpus to only pick category in world news
+au_corpus <- corpus_subset(covid_corp, country %in% c('AU'))
+au_corpus 
+
+au_dfm <- dfm(au_corpus, tolower=TRUE, stem = TRUE,  remove = c(stopwords("english"), tad_stopwords), remove_punct = TRUE, remove_numbers = TRUE, remove_url = TRUE, remove_hyphens = TRUE, remove_symbols = TRUE)
+au_dfm
+
+# create a matrix
+au_matrix <- convert(au_dfm, to = "matrix") 
+
+# convert dfm to lsa
+au_matrix_lsa <- convert(au_dfm, to = "lsa") 
+
+au_matrix_lsa <- lw_logtf(au_matrix_lsa) * gw_idf(au_matrix_lsa)
+head(au_matrix_lsa, 10)
+associate(au_matrix_lsa, "coronavirus", "cosine", threshold = .2)[1:10]
+
+
+
+
+
+# subset the corpus to only pick category in world news
+nz_corpus <- corpus_subset(covid_corp, country %in% c('NZ'))
+nz_corpus 
+
+nz_dfm <- dfm(nz_corpus, tolower=TRUE, stem = TRUE,  remove = c(stopwords("english"), tad_stopwords), remove_punct = TRUE, remove_numbers = TRUE, remove_url = TRUE, remove_hyphens = TRUE, remove_symbols = TRUE)
+nz_dfm
+
+# create a matrix
+nz_matrix <- convert(nz_dfm, to = "matrix") 
+
+# convert dfm to lsa
+nz_matrix_lsa <- convert(nz_dfm, to = "lsa") 
+
+nz_matrix_lsa <- lw_logtf(nz_matrix_lsa) * gw_idf(nz_matrix_lsa)
+head(nz_matrix_lsa, 10)
+associate(nz_matrix_lsa, "virus", "cosine", threshold = .2)[1:10]
+
+
+# subset the corpus to only pick category in world news
+ca_corpus <- corpus_subset(covid_corp, country %in% c('CA'))
+ca_corpus 
+
+ca_dfm <- dfm(ca_corpus, tolower=TRUE, stem = TRUE,  remove = c(stopwords("english"), tad_stopwords), remove_punct = TRUE, remove_numbers = TRUE, remove_url = TRUE, remove_hyphens = TRUE, remove_symbols = TRUE)
+ca_dfm
+
+# create a matrix
+ca_matrix <- convert(ca_dfm, to = "matrix") 
+
+# convert dfm to lsa
+ca_matrix_lsa <- convert(ca_dfm, to = "lsa") 
+
+ca_matrix_lsa <- lw_logtf(ca_matrix_lsa) * gw_idf(ca_matrix_lsa)
+head(ca_matrix_lsa, 10)
+associate(ca_matrix_lsa, "virus", "cosine", threshold = .2)[1:10]
+
+
+
+
+
+
+
+
+
+save.image("./Workspaces/lsa_2.RData")
+load("./Workspaces/lsa_2.RData")
+
+
+# Find close terms in a textmatrix 
+associate(us_matrix_lsa, "coronavirus", "cosine", threshold = .2)[1:5]
+associate(us_matrix_lsa, "coronavirus", "cosine", threshold = .2)[1:10]
+
+# Find close terms in a textmatrix 
+associate(us_matrix_lsa, "case", "cosine", threshold = .2)[1:5]
+
+# Find close terms in a textmatrix 
+associate(us_matrix_lsa, "health", "cosine", threshold = .2)[1:5]
+
+save.image("./Workspaces/lsa.RData")
+load("./Workspaces/lsa.RData")
+
+
+
+
+#########
 # convert dfm to lsa
 us_matrix_lsa <- convert(us_dfm, to = "lsa") 
 
